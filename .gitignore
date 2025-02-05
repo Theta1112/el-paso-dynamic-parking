@@ -1,5 +1,8 @@
 .Rproj.user
+.Rproj
 .Rhistory
 .RData
+.RDataTmp
 .Ruserdata
 /secure
+/data

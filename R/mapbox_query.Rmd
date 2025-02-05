@@ -1,0 +1,100 @@
+---
+title: "EDA"
+author: "Sean Koh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(sf)
+library(httr)
+library(jsonlite)
+library(data.table)
+```
+
+
+```{r read-files}
+
+raw.data <- rbind(fread("data/pems transactions jan-jun2024.csv"),
+                  fread("data/pems transactions jul-dec2024.csv"))
+
+raw.streets <- st_read("data/EPCenterline.geojson")
+```
+
+```{r }
+
+# There are likely 1992 unique parking meters
+length(unique(raw.data$id))
+length(unique(raw.data$name))
+length(unique(raw.data$street))
+
+meters <- raw.data %>%
+  dplyr::select(block, street, id, name, streettype) %>%
+  distinct()
+
+get.geodata <- function(meters) {
+  
+  access.token <- read_file("secure/mapbox.txt")
+  
+  for(i in 1:nrow(meters)){
+    
+    if (i %% 100 == 0) {
+      print(paste("PROGRESS:", i))
+    }
+    
+    row <- meters[i,]
+    
+    # Extract the block number from the name
+    request.number <- substring(regmatches(row$name,regexpr("-(.*)",row$name)),2)
+    request.street <- paste(row$street, row$streettype)
+    
+    request.place <- "El+Paso"
+    request.region <- "Texas"
+    request.country <- "United+States"
+    
+    request.string <- paste0("https://api.mapbox.com/search/geocode/v6/forward?",
+                        "address_number=", request.number,
+                        "&street=", request.street, 
+                        "&place=", request.place,
+                        "&region=", request.region,
+                        "&country=", request.country, 
+                        "&access_token=", access.token)
+
+    # Final Check on string to get rid of spaces and sub them for plus
+    request.string <- gsub(" ", "+", request.string)
+    
+    # Execute GET request
+    response <- GET(request.string)
+    
+    # Read response as GeoJSON
+    response.sf <- st_read(rawToChar(response$content), quiet = T)
+    
+    # Pick top request that is located in El Paso
+    option.index <- min(which(str_detect(response.sf$place_formatted, "El Paso")))
+    
+    # Check if any valid option found
+    if (option.index == Inf) {
+      print("NOT FOUND")
+      print(i)
+      print(request.number)
+      print(request.street)
+    } else if (i == 1) {
+      out.geometries <- response.sf[option.index,"geometry"]
+    } else {
+      out.geometries <- rbind(out.geometries, response.sf[option.index,"geometry"])
+    }
+  } 
+  
+  return(out.geometries)
+}
+
+t.out <- get.geodata(meters)
+```
+
+```{r }
+
+
+```
