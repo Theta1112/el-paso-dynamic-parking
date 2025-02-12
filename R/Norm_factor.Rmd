@@ -1,0 +1,47 @@
+---
+title: "norm_factor"
+author: "Ryan Swett"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#load libraries and data
+library(sf)
+library(dplyr)
+network <- st_read("/Users/ryanswett/Downloads/Spring2025/Practicum/EPCenterline.geojson")
+parking_data <- read.csv("/Users/ryanswett/Downloads/Spring2025/Practicum/Combined_Parking_Data.csv") %>%
+  mutate(geometry = gsub("]", "", geometry))
+```
+
+```{r}
+#project to same coordinate system
+parking_data_sf <- st_as_sf(parking_data, wkt = "geometry", crs = 4326)
+parking_data_sf <- st_transform(parking_data_sf, st_crs(network))
+```
+
+
+```{r}
+#spatial join
+joined_data <- st_join(parking_data_sf, network)
+```
+
+```{r}
+# Load necessary libraries for plotting
+library(ggplot2)
+
+# Plot the joined data
+ggplot() +
+  geom_sf(data = network, color = "lightblue", size = 0.5) +  
+  geom_sf(data = joined_data, aes(color = as.factor(Primary.Street)), size = 2) +  
+  theme_minimal() +
+  labs(title = "Spatial Join: Parking Data with Network",
+       color = "Street") +
+  theme(legend.position = "right")
+
+```
+
+- join the streets in the network to the parking data assuming there's a least one parking space per street (Observed.spaces)
+- join using geometry
+- see if you have one intersection for each street
+- scaling of the shape length in "network"
