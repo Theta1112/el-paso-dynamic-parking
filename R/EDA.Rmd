@@ -1,0 +1,389 @@
+---
+title: "El Paso EDA Exploring"
+output: html_document
+date: "2025-02-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+library(tidyverse)
+library(lubridate)
+
+
+file_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Mobility Data Cincinnati Area Businesses/Home Locations-DESKTOP-MO52HOV.csv"
+
+
+foot_traffic <- read_csv(file_path)
+
+
+foot_traffic <- foot_traffic %>%
+  mutate(
+    Date = mdy(Date), 
+    Time = hms(Time),
+    Hour = hour(Time)
+  )
+
+
+foot_traffic <- foot_traffic %>%
+  drop_na(`Polygon Name`, `Hashed Ubermedia Id`, `Hour`)
+
+
+foot_traffic <- foot_traffic %>%
+  group_by(`Polygon Name`) %>%
+  mutate(Device_Count = n_distinct(`Hashed Ubermedia Id`)) %>%
+  ungroup()
+
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+
+foot_traffic_summary <- foot_traffic %>%
+  count(`Polygon Name`, name = "Device_Count")
+
+
+head(foot_traffic_summary)
+
+```
+
+
+```{r}
+
+foot_traffic_summary %>%
+  mutate(`Polygon Name` = reorder(`Polygon Name`, Device_Count)) %>%
+  ggplot(aes(x = `Polygon Name`, y = Device_Count, fill = Device_Count)) +
+  
+
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  
+
+  coord_flip() +
+  
+
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  
+
+  labs(
+    title = "Average Foot Traffic by Location Type",
+    subtitle = "Sorted by Number of Unique Devices",
+    x = "Location Type",
+    y = "Number of Unique Devices",
+    caption = "Data Source: Mobility Data"
+  ) +
+  
+
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557"),
+    plot.subtitle = element_text(size = 14, color = "#457B9D"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 10),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey80", linetype = "dotted"),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+
+
+```{r}
+ggplot(foot_traffic, aes(x = Hour, y = `Polygon Name`, fill = Device_Count)) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  labs(title = "Foot Traffic by Hour and Place", x = "Hour of Day", y = "Location Type", fill = "Traffic Level") +
+  theme_minimal()
+
+```
+
+
+```{r}
+
+library(sf)
+
+shp_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Meters Shapefile/meters.shp"
+geojson_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Meters Shapefile/meters.geojson"
+
+
+meters <- st_read(shp_path)
+
+
+st_write(meters, geojson_path, driver = "GeoJSON")
+
+```
+
+```{r}
+
+meters_geojson <- st_read("/Users/macytrout/Desktop/El Paso Parking Data/Meters Shapefile/meters.geojson")
+
+
+```
+
+```{r}
+library(sf)
+library(dplyr)
+
+
+geojson_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Meters Shapefile/meters.geojson"
+meters <- st_read(geojson_path)
+
+
+meters <- meters %>%
+  mutate(Longitude = st_coordinates(.)[,1], 
+         Latitude = st_coordinates(.)[,2])
+
+
+head(meters)
+
+```
+
+```{r}
+library(sf)
+library(dplyr)
+
+meters <- st_set_crs(meters, 26913)
+
+
+meters <- st_transform(meters, 4326)
+
+
+st_bbox(meters)
+
+```
+
+
+
+```{r}
+
+library(sf)
+library(dplyr)
+library(readr)
+
+
+foot_traffic_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Mobility Data Cincinnati Area Businesses/Home Locations-DESKTOP-MO52HOV.csv"
+foot_traffic <- read_csv(foot_traffic_path)
+
+
+foot_traffic_clean <- foot_traffic %>%
+  drop_na(`Common Evening Long`, `Common Evening Lat`)
+
+
+foot_traffic_clean <- foot_traffic_clean %>%
+  filter(`Common Evening Long` > -107, `Common Evening Long` < -106,
+         `Common Evening Lat` > 31.6, `Common Evening Lat` < 32)
+
+foot_traffic_sf <- st_as_sf(foot_traffic_clean, coords = c("Common Evening Long", "Common Evening Lat"), crs = 4326, remove = FALSE)
+
+st_bbox(foot_traffic_sf)
+
+```
+
+
+
+```{r}
+
+meters <- st_set_crs(meters, 26913)
+
+
+meters <- st_transform(meters, 4326)
+
+
+st_bbox(meters)
+
+```
+
+```{r}
+library(ggplot2)
+library(ggspatial)
+
+ggplot() +
+  annotation_map_tile(type = "osm", zoom = 12) +
+  geom_sf(data = foot_traffic_sf, color = "red", alpha = 0.3, size = 0.5) +
+  labs(title = "Foot Traffic Hotspots in El Paso, TX", x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+```
+
+
+```{r}
+
+library(ggplot2)
+library(ggspatial)
+
+ggplot() +
+  annotation_map_tile(type = "osm", zoom = 10) + 
+  stat_density_2d(data = as.data.frame(st_coordinates(foot_traffic_sf)), 
+                  aes(x = X, y = Y, fill = ..level..), geom = "polygon", alpha = 0.5) +
+  scale_fill_viridis_c() +
+  labs(title = "Foot Traffic Density in El Paso, TX", x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+foot_traffic_clean %>%
+  mutate(Hour = hour(Time)) %>%
+  ggplot(aes(x = Hour)) +
+  
+  geom_histogram(binwidth = 1, fill = "#E63946", color = "black", alpha = 0.8) +
+  
+
+  geom_density(aes(y = ..count..), color = "#1D3557", linewidth = 1.2, alpha = 0.8) +
+  
+
+  labs(
+    title = "Foot Traffic by Hour in El Paso",
+    subtitle = "Peaks in activity highlight busiest times",
+    x = "Hour of the Day",
+    y = "Number of Visitors",
+    caption = "Data Source: Mobility Data"
+  ) +
+
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557"),
+    plot.subtitle = element_text(size = 14, color = "#457B9D"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    panel.grid.major = element_line(color = "grey80", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "#F1FAEE", color = NA)
+  ) +
+  
+
+  scale_x_continuous(breaks = seq(0, 23, by = 2)) +
+  
+
+  geom_vline(xintercept = c(8, 17), linetype = "dashed", color = "black", linewidth = 1) +
+
+  annotate("text", x = 8, y = max(table(foot_traffic_clean$Hour)), 
+           label = "Morning Peak", vjust = -1, fontface = "bold", color = "#E63946") +
+  annotate("text", x = 17, y = max(table(foot_traffic_clean$Hour)), 
+           label = "Evening Peak", vjust = -1, fontface = "bold", color = "#E63946")
+
+```
+
+
+```{r}
+
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(viridis)
+library(lubridate)
+
+
+geojson_path <- "/Users/macytrout/Desktop/El Paso Parking Data/nov_occupancy.geojson"
+csv_path <- "/Users/macytrout/Desktop/El Paso Parking Data/nov_occupancy.csv"
+
+# --- NOVEMBER OCCUPANCY DATA ---
+
+occupancy_sf <- st_read(geojson_path)
+
+st_crs(occupancy_sf)
+
+
+if (st_crs(occupancy_sf)$epsg != 4326) {
+  occupancy_sf <- st_transform(occupancy_sf, 4326)
+}
+
+
+occupancy_df <- read_csv(csv_path)
+
+
+glimpse(occupancy_df)
+
+```
+
+
+
+```{r}
+
+ggplot() +
+  geom_sf(data = occupancy_sf, aes(fill = street_occupied), color = "black", size = 0.2) +
+  scale_fill_viridis_c(option = "plasma", name = "Occupancy Level") +
+  labs(title = "Parking Occupancy - November",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+
+```
+
+
+
+```{r}
+
+summary(occupancy_sf$street_occupied)
+hist(occupancy_sf$street_occupied, breaks = 30, col = "lightblue", main = "Distribution of Occupancy")
+
+```
+
+
+
+```{r}
+
+foot_traffic_clean <- foot_traffic %>%
+  filter(!is.na(`Common Evening Long`), !is.na(`Common Evening Lat`))
+
+
+foot_traffic_sf <- st_as_sf(foot_traffic_clean, 
+                            coords = c("Common Evening Long", "Common Evening Lat"), 
+                            crs = 4326)
+
+
+occupancy_sf <- occupancy_sf %>%
+  mutate(street_occupied = as.numeric(street_occupied))
+
+str(occupancy_sf$street_occupied)
+unique(occupancy_sf$street_occupied)
+
+
+st_bbox(occupancy_sf)
+st_bbox(foot_traffic_sf)
+```
+
+```{r}
+
+ggplot() +
+  geom_sf(data = occupancy_sf, aes(fill = street_occupied), color = "black", size = 0.2) +
+  scale_fill_viridis_c(option = "plasma", name = "Occupancy Level") +
+  labs(title = "Parking Occupancy - November",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+ggplot() +
+  geom_density_2d_filled(data = as.data.frame(st_coordinates(foot_traffic_sf)),
+                         aes(x = X, y = Y), alpha = 0.5, bins = 10) +
+  labs(title = "Foot Traffic Hotspots",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+
+```
+
+
+
+
