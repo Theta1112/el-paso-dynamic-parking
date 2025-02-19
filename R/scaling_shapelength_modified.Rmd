@@ -1,0 +1,114 @@
+---
+title: "norm_factor"
+author: "Ryan Swett"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r file-setup, include=FALSE}
+#load libraries and data
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+
+network <- st_read("data/EPCenterline.geojson")
+
+parking_data <- read.csv("data/Combined_Parking_Data.csv") %>%
+  mutate(geometry = gsub("]", "", geometry))
+```
+
+```{r}
+#project to same coordinate system
+parking_data_sf <- st_as_sf(parking_data, wkt = "geometry", crs = 4326)
+parking_data_sf <- st_transform(parking_data_sf, st_crs(network))
+```
+
+```{r}
+# Plot the street network
+ggplot() +
+  geom_sf(data = network, color = "black", size = 0.2) +  
+  theme_minimal() +
+  labs(title = "Street Network") +
+  theme(legend.position = "none")
+
+# Plot the parking data
+ggplot() +
+  geom_sf(data = parking_data_sf, color = "red", size = 2, alpha = 0.5) +  
+  theme_minimal() +
+  labs(title = "Parking Data",
+       subtitle = "Red: Parking Spaces") +
+  theme(legend.position = "none")
+```
+
+```{r}
+# Zoom to parking_data
+xmin <- -106.51  
+xmax <- -106.49  
+ymin <- 31.77  
+ymax <- 31.774  
+
+# Plot data together - parking spaces line up with the street grid
+ggplot() +
+  xlim(xmin, xmax) +
+  ylim(ymin, ymax) + 
+  geom_sf(data = distinct.parking, color = "red", size = 2, alpha = 0.5) +
+  geom_sf(data = subarea.streets, 
+          aes(color = as.character(OBJECTID_1)), size = 0.2) +
+  
+  theme_minimal() +
+  labs(title = "Street Network with Parking Spaces",
+       subtitle = "Red: Parking Spaces")
+  
+```
+
+```{r}
+# create scaled length
+network$street_length <- as.numeric(st_length(network))
+max_length <- max(network$street_length)
+network$scaled_length <- network$street_length / max_length
+
+head(network)
+```
+```{r join}
+
+# Group the polygons and identify them with parking.id
+distinct.parking <- parking_data_sf %>%
+  distinct(Observed.Spaces, geometry) %>%
+  filter(!is.na(Observed.Spaces)) %>%
+  group_by(geometry) %>%
+  summarise(max_spaces = max(Observed.Spaces)) %>%
+  mutate(parking.id = 1:22)
+
+# Join the stree polygons to the nearest street polylines
+distinct.parking$OBJECTID_1 <- network[
+  st_nearest_feature(st_centroid(distinct.parking), network),
+  "OBJECTID_1"] %>%
+  st_drop_geometry() %>%
+  unlist()
+
+# Join to get the parking data
+measured_streets <- network %>%
+  right_join(distinct.parking %>% st_drop_geometry()) %>%
+  mutate(spots.over.length = max_spaces / street_length,)
+
+# Compute mean and median
+print(paste("Mean spots over length =", mean(measured_streets$spots.over.length)))
+print(paste("Median spots over length =", median(measured_streets$spots.over.length)))
+
+# Histogram of spots per unit
+hist(measured_streets$spots.over.length)
+```
+
+```{r project_forward}
+
+# Estimate the parking in the city using the estimate given
+estimated_parking = network %>%
+  mutate(est_parking = 0.17 * street_length) %>%
+  dplyr::select(est_parking, street_length, OBJECTID_1)
+
+# Write output
+st_write(estimated_parking, "data/capacity_estimate.geojson", row.names = F, append=FALSE)
+```
+
+
