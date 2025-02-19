@@ -15,6 +15,8 @@ library(data.table)
 library(basemaps)
 
 CRS_TARGET = "EPSG:32139"
+
+mapbox.apikey = readChar("secure/mapbox.txt", file.info("secure/mapbox.txt")$size)
 ```
 
 ```{r load-data}
@@ -116,9 +118,6 @@ ggplot(data = nov.streets %>%
   geom_abline(aes(intercept=0.8, slope=0), colour = "red") + 
   labs(y = "Occupancy Rate", x = "November Time Buckets")
 
-
-
-streets %>% filter(street.ID == 8888)
 ```
 
 ```{r compute-toc, fig.height=11, fig.width=11}
@@ -130,23 +129,26 @@ nov.toc <- nov.streets %>%
   summarise(toc = 15 * sum(over.capacity)) %>%
   ungroup()
 
-
-
 nov.toc <- streets %>%
   right_join(nov.toc)
 
-min.in.nov = 60 * 24 *30
-st_bbox(nov.toc  %>% st_transform("EPSG:3857"))
+st_write(nov.toc, "data/nov_toc.geojson", row.names = F, append=FALSE)
+
+```
+
+```{r toc-plot}
+
 
 bm <- basemap_ggplot(ext = st_bbox(nov.toc),
                      map_res = 2,
                      map_service = "mapbox", 
                      map_type = "streets", 
-                     map_token = 'pk.eyJ1Ijoic2Vhbm1rb2giLCJhIjoiY20weGIyMmxzMDMzazJzb2RzMXFnbTk0dCJ9.7kSalMKf-WpQ5wpeDUISoA')
+                     map_token = mapbox.apikey)
 
 bm +
   xlim(-11856000, -11853000) + 
   ylim(3730500, 3734800) + 
   geom_sf(data = nov.toc %>% st_transform("EPSG:3857"), aes(colour = toc)) + 
   theme_void()
+
 ```
