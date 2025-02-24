@@ -240,18 +240,19 @@ foot_traffic_clean %>%
   mutate(Hour = hour(Time)) %>%
   ggplot(aes(x = Hour)) +
   
-  geom_histogram(binwidth = 1, fill = "#E63946", color = "black", alpha = 0.8) +
+
+  geom_histogram(binwidth = 1, fill = "#457B9D", color = "white", alpha = 0.85) +
   
 
-  geom_density(aes(y = ..count..), color = "#1D3557", linewidth = 1.2, alpha = 0.8) +
+  geom_density(aes(y = ..count..), color = "#E63946", linewidth = 1.2, alpha = 0.8) +
   
 
   labs(
-    title = "Foot Traffic by Hour in El Paso",
-    subtitle = "Peaks in activity highlight busiest times",
+    title = "Hourly Foot Traffic in El Paso",
+    subtitle = "Distribution of visitors throughout the day",
     x = "Hour of the Day",
     y = "Number of Visitors",
-    caption = "Data Source: Mobility Data"
+    caption = "Source: Mobility Data"
   ) +
 
   theme_minimal(base_size = 14) +
@@ -264,25 +265,66 @@ foot_traffic_clean %>%
     axis.text.y = element_text(size = 12),
     panel.grid.major = element_line(color = "grey80", linetype = "dotted"),
     panel.grid.minor = element_blank(),
-    plot.background = element_rect(fill = "#F1FAEE", color = NA)
+    plot.background = element_rect(fill = "#F8F9FA", color = NA)
   ) +
   
 
-  scale_x_continuous(breaks = seq(0, 23, by = 2)) +
-  
-
-  geom_vline(xintercept = c(8, 17), linetype = "dashed", color = "black", linewidth = 1) +
-
-  annotate("text", x = 8, y = max(table(foot_traffic_clean$Hour)), 
-           label = "Morning Peak", vjust = -1, fontface = "bold", color = "#E63946") +
-  annotate("text", x = 17, y = max(table(foot_traffic_clean$Hour)), 
-           label = "Evening Peak", vjust = -1, fontface = "bold", color = "#E63946")
-
+  scale_x_continuous(breaks = seq(0, 23, by = 2)) 
 ```
 
 
 ```{r}
 
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# weekday versus weekend column creation 
+foot_traffic_clean <- foot_traffic_clean %>%
+  mutate(
+    Hour = hour(Time),
+    Day_Type = ifelse(`Day of Week` %in% c("Fri", "Sat", "Sun"), "Weekend (Fri-Sun)", "Weekday (Mon-Thu)")
+  )
+
+ggplot(foot_traffic_clean, aes(x = Hour)) +
+  
+  geom_histogram(binwidth = 1, fill = "#457B9D", color = "white", alpha = 0.85) +
+  
+  geom_density(aes(y = ..count..), color = "#E63946", linewidth = 1.2, alpha = 0.8) +
+  
+  facet_wrap(~Day_Type) + 
+  
+  labs(
+    title = "Hourly Foot Traffic in El Paso",
+    subtitle = "Comparing Weekday vs. Weekend Visitor Patterns",
+    x = "Hour of the Day",
+    y = "Number of Visitors",
+    caption = "Source: Mobility Data"
+  ) +
+
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557"),
+    plot.subtitle = element_text(size = 14, color = "#457B9D"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    strip.text = element_text(size = 14, face = "bold"),
+    panel.grid.major = element_line(color = "grey80", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "#F8F9FA", color = NA)
+  ) +
+  
+  scale_x_continuous(breaks = seq(0, 23, by = 2)) 
+
+
+```
+
+
+
+
+```{r}
 library(sf)
 library(ggplot2)
 library(dplyr)
@@ -294,7 +336,7 @@ library(lubridate)
 geojson_path <- "/Users/macytrout/Desktop/El Paso Parking Data/nov_occupancy.geojson"
 csv_path <- "/Users/macytrout/Desktop/El Paso Parking Data/nov_occupancy.csv"
 
-# --- NOVEMBER OCCUPANCY DATA ---
+
 
 occupancy_sf <- st_read(geojson_path)
 
@@ -317,6 +359,8 @@ glimpse(occupancy_df)
 
 ```{r}
 
+# ignore 
+
 ggplot() +
   geom_sf(data = occupancy_sf, aes(fill = street_occupied), color = "black", size = 0.2) +
   scale_fill_viridis_c(option = "plasma", name = "Occupancy Level") +
@@ -330,6 +374,8 @@ ggplot() +
 
 
 ```{r}
+
+# ignore 
 
 summary(occupancy_sf$street_occupied)
 hist(occupancy_sf$street_occupied, breaks = 30, col = "lightblue", main = "Distribution of Occupancy")
@@ -362,6 +408,8 @@ st_bbox(foot_traffic_sf)
 
 ```{r}
 
+# ignore 
+
 ggplot() +
   geom_sf(data = occupancy_sf, aes(fill = street_occupied), color = "black", size = 0.2) +
   scale_fill_viridis_c(option = "plasma", name = "Occupancy Level") +
@@ -373,17 +421,380 @@ ggplot() +
 
 
 
+
 ```{r}
+
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(tigris) 
+library(viridis)  
+library(ggthemes)    
+
+```
+
+
+```{r}
+
+home_data_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Mobility Data Cincinnati Area Businesses/Home Locations.csv"
+foot_traffic_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Mobility Data Cincinnati Area Businesses/Home Locations-DESKTOP-MO52HOV.csv"
+
+
+home_data <- read_csv(home_data_path) %>%
+  rename(Hashed_Id = `Hashed Ubermedia Id`,
+         Home_Lat = `Common Evening Lat`,
+         Home_Long = `Common Evening Long`,
+         Home_Census_Tract = `Common Evening Census`)
+
+
+foot_traffic <- read_csv(foot_traffic_path) %>%
+  rename(Hashed_Id = `Hashed Ubermedia Id`,
+         Business_Name = `Polygon Name`,
+         Visit_Lat = `Common Evening Lat`,
+         Visit_Long = `Common Evening Long`,
+         Visit_Time = `Visit Timestamp`)
+
+```
+
+```{r}
+
+merged_data <- foot_traffic %>%
+  left_join(home_data, by = "Hashed_Id") %>%
+  drop_na(Home_Lat, Home_Long)
+
+
+```
+
+
+```{r}
+
+library(tigris)
+library(sf)
+library(dplyr)
+
+
+el_paso_tracts <- tracts(state = "TX", county = "El Paso", year = 2022, class = "sf")
+
+
+el_paso_tracts <- st_transform(el_paso_tracts, crs = 4326)
+
+
+home_sf <- st_as_sf(merged_data, coords = c("Home_Long", "Home_Lat"), crs = 4326, remove = FALSE)
+
+
+st_crs(home_sf) == st_crs(el_paso_tracts)
+
+
+home_sf <- st_transform(home_sf, crs = st_crs(el_paso_tracts))
+
+
+home_with_tracts <- st_join(home_sf, el_paso_tracts, join = st_within)
+
+
+tract_counts <- home_with_tracts %>%
+  st_drop_geometry() %>%
+  group_by(GEOID) %>%
+  summarise(Visitor_Count = n())
+
+
+el_paso_tracts <- el_paso_tracts %>%
+  left_join(tract_counts, by = "GEOID") %>%
+  mutate(Visitor_Count = replace_na(Visitor_Count, 0))
+
+
 ggplot() +
-  geom_density_2d_filled(data = as.data.frame(st_coordinates(foot_traffic_sf)),
-                         aes(x = X, y = Y), alpha = 0.5, bins = 10) +
-  labs(title = "Foot Traffic Hotspots",
-       x = "Longitude", y = "Latitude") +
+  geom_sf(data = el_paso_tracts, aes(fill = Visitor_Count), color = "white") +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(title = "Where Visitors to El Paso Businesses Live",
+       fill = "Visitor Count") +
   theme_minimal()
 
 
 ```
 
 
+```{r}
 
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+
+business_locations <- business_locations %>%
+  filter(
+    Visit_Lat > 31 & Visit_Lat < 32, 
+    Visit_Long > -107 & Visit_Long < -106
+  )
+
+business_sf <- st_as_sf(business_locations, coords = c("Visit_Long", "Visit_Lat"), crs = 4326)
+
+print(st_geometry(business_sf))
+```
+
+
+```{r}
+ggplot() +
+  geom_sf(data = business_sf, color = "red", size = 2, alpha = 0.7) +
+  labs(title = "Business Locations in El Paso", x = "Longitude", y = "Latitude") +
+  theme_minimal()
+
+
+```
+
+```{r}
+
+foot_traffic_clean <- foot_traffic %>%
+  filter(
+    Visit_Lat > 31 & Visit_Lat < 32, 
+    Visit_Long > -107 & Visit_Long < -106
+  )
+
+
+foot_traffic_sf <- st_as_sf(foot_traffic_clean, coords = c("Visit_Long", "Visit_Lat"), crs = 4326)
+
+```
+
+
+```{r}
+
+
+ggplot() +
+  geom_sf(data = business_sf, color = "red", size = 1, alpha = 0.6) +
+  stat_density_2d(data = as.data.frame(st_coordinates(foot_traffic_sf)), 
+                  aes(x = X, y = Y, fill = ..level..), 
+                  geom = "polygon", alpha = 0.4, bins = 30) +
+  scale_fill_viridis_c(option = "inferno", name = "Traffic Density", alpha = 0.7) +
+  labs(title = "Foot Traffic Hotspots & Business Locations in El Paso", 
+       x = "Longitude", y = "Latitude") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+
+```{r}
+
+# ignore 
+
+library(ggplot2)
+library(sf)
+library(ggmap)
+library(ggspatial)
+
+
+el_paso_bbox <- as.numeric(st_bbox(foot_traffic_sf))
+
+library(ggmap)
+
+
+register_stadiamaps(key = "Y5c50e731-3d60-45bb-ac24-e95d5800915b")
+
+
+el_paso_map <- get_stadiamap(bbox = el_paso_bbox, zoom = 13, maptype = "stamen_toner_lite")
+
+
+```
+
+```{r}
+# ignore 
+
+
+ggmap(el_paso_map) +
+  stat_density_2d(data = as.data.frame(st_coordinates(foot_traffic_sf)), 
+                  aes(x = X, y = Y, fill = ..level..), 
+                  geom = "polygon", alpha = 0.4, bins = 30) +
+  scale_fill_viridis_c(option = "inferno", name = "Traffic Density", alpha = 0.7) +
+  
+
+  geom_sf(data = business_sf, shape = 21, fill = "red", color = "white", size = 3, alpha = 0.8) +
+
+  labs(title = "Foot Traffic Hotspots & Business Locations in El Paso", 
+       x = "Longitude", y = "Latitude") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+
+```
+
+
+```{r}
+
+# where peoples are coming from based on census tract 
+
+library(tigris)
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+
+el_paso_tracts <- tracts(state = "TX", county = "El Paso", year = 2022, class = "sf")
+
+
+el_paso_tracts <- st_transform(el_paso_tracts, crs = 4326)
+
+
+home_sf <- st_as_sf(foot_traffic_clean, 
+                    coords = c("Visit_Long", "Visit_Lat"), 
+                    crs = 4326)
+
+
+if (st_crs(home_sf) != st_crs(el_paso_tracts)) {
+  home_sf <- st_transform(home_sf, crs = st_crs(el_paso_tracts))
+}
+
+home_with_tracts <- st_join(home_sf, el_paso_tracts, left = FALSE)
+
+
+tract_counts <- home_with_tracts %>%
+  st_drop_geometry() %>%
+  group_by(GEOID) %>%
+  summarise(Visitor_Count = n(), .groups = "drop")
+
+el_paso_tracts <- left_join(el_paso_tracts, tract_counts, by = "GEOID")
+
+
+ggplot(el_paso_tracts) +
+  geom_sf(aes(fill = Visitor_Count), color = "white", size = 0.3) +
+  scale_fill_viridis_c(option = "plasma", name = "Visitor Count", na.value = "grey80") +
+  labs(title = "Where Visitors to El Paso Businesses Live",
+       subtitle = "Based on Home Locations of Foot Traffic Data",
+       x = "Longitude", y = "Latitude") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+
+```
+
+
+
+```{r}
+# this doesnt work yet, ignore 
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(units)
+
+
+home_data_clean <- home_data %>%
+  filter(!is.na(Home_Long) & !is.na(Home_Lat))
+
+business_data_clean <- business_data %>%
+  filter(!is.na(Visit_Long) & !is.na(Visit_Lat))
+
+
+home_sf <- st_as_sf(home_data_clean, coords = c("Home_Long", "Home_Lat"), crs = 4326)
+business_sf <- st_as_sf(business_data_clean, coords = c("Visit_Long", "Visit_Lat"), crs = 4326)
+
+
+if (st_crs(home_sf) != st_crs(business_sf)) {
+  business_sf <- st_transform(business_sf, crs = st_crs(home_sf))
+}
+
+
+home_sf$nearest_business <- st_nearest_feature(home_sf, business_sf)
+
+
+distances <- st_distance(home_sf, business_sf[home_sf$nearest_business, ], by_element = TRUE)
+distances_miles <- set_units(distances, "miles") %>% drop_units()
+
+home_sf$distance_miles <- distances_miles
+
+
+ggplot(home_sf, aes(x = distance_miles)) +
+  geom_histogram(bins = 50, fill = "blue", color = "white", alpha = 0.7) +
+  labs(title = "Distribution of Travel Distances to El Paso Businesses",
+       x = "Distance Traveled (Miles)",
+       y = "Number of Visitors") +
+  theme_minimal()
+
+
+ggplot(home_sf, aes(y = distance_miles)) +
+  geom_boxplot(fill = "lightblue", color = "darkblue", alpha = 0.7) +
+  labs(title = "Boxplot of Travel Distances",
+       y = "Distance Traveled (Miles)") +
+  theme_minimal()
+
+
+
+```
+
+
+
+```{r}
+library(tigris)
+library(sf)
+library(dplyr)
+library(ggplot2)
+library(geosphere)
+
+
+el_paso_tracts <- tracts(state = "TX", county = "El Paso", year = 2022, class = "sf")
+el_paso_tracts <- st_transform(el_paso_tracts, crs = 4326)
+
+
+home_sf <- st_as_sf(merged_data, coords = c("Home_Long", "Home_Lat"), crs = 4326, remove = FALSE)
+
+el_paso_center <- c(-106.485, 31.7587) 
+
+home_sf$distance_miles <- distHaversine(
+  matrix(c(home_sf$Home_Long, home_sf$Home_Lat), ncol = 2),
+  el_paso_center
+) / 1609.34 
+
+
+home_sf_filtered <- home_sf %>%
+  filter(distance_miles <= 300)
+
+library(ggplot2)
+library(scales)
+
+ggplot(home_sf_filtered, aes(x = distance_miles)) +
+  
+
+  geom_histogram(binwidth = 2, fill = "#457B9D", color = "white", alpha = 0.85) +
+  
+
+  labs(
+    title = "How Far are Visitors Traveling to El Paso?",
+    subtitle = "Majority of visitors come from within 50 miles",
+    x = "Distance (Miles)",
+    y = "Number of Visitors Collected",
+    caption = "Calculated using home locations and great-circle distance\n(Data from 2019-2022)"
+  ) +
+  
+
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557", hjust = 0.5),
+    plot.subtitle = element_text(size = 14, color = "#457B9D", hjust = 0.5),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    panel.grid.major = element_line(color = "grey85", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "#F8F9FA", color = NA),
+    plot.caption = element_text(hjust = 0.5, size = 10, face = "italic")
+  ) +
+
+
+  scale_x_continuous(limits = c(0, 50), breaks = seq(0, 50, by = 5), expand = c(0, 0)) +
+  scale_y_continuous(labels = comma) 
+
+
+```
+
+This is showing 
 
