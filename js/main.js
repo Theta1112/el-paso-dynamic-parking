@@ -7,11 +7,13 @@ import { initializeStreets } from "./street_create.js";
 const eventBus = new EventTarget(); 
 
 // Initialize Background Map
-var map = initializeMap(document.querySelector('map'), eventBus);
+var map = initializeMap(document.querySelector('#map'), eventBus);
 
 // Load data
-meterData = await loadMeterData(eventBus);
-streetData = await loadStreetData(eventBus);
+const meterData = await loadMeterData(eventBus);
+const streetData = await loadStreetData(eventBus);
 
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
+
+// Test comment
