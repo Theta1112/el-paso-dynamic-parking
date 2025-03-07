@@ -17,8 +17,8 @@ function initializeMap(mapElement, eventBus) {
 
   // Base maps object for layer control
   var baseMaps = {
-    "Light Mode": lightMap,
-    "Dark Mode": darkMap
+    'Light Mode': lightMap,
+    'Dark Mode': darkMap
   };
 
   // Add layer control to the map

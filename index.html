@@ -2,15 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale = 1.0">
     <title>Parking Meters Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="map"></div>
+    <div id="main">
+      <div id="map"></div>
+      <div class="time-slider slider">
+
+        <div class="slider-filter-container">
+          <input type="image" src="images/clock.png" class="filter-button button-1"></input>
+          <input type="image" src="images/clock.png" class="filter-button button-2"></input>
+          <input type="image" src="images/clock.png" class="filter-button button-3"></input>
+        </div>
+        
+        <div class="slider-open-button-container time-open-container">
+          <input type="image" src="images/clock.png" class="slider-open-button time-button"></input>
+        </div>
+      </div>
+
+      <div class="data-slider slider">
+
+        <div class="slider-filter-container">
+          <input type="image" src="images/cells.png" class="filter-button button-1"></input>
+          <input type="image" src="images/cells.png" class="filter-button button-2"></input>
+          <input type="image" src="images/cells.png" class="filter-button button-3"></input>
+          <input type="image" src="images/cells.png" class="filter-button button-4"></input>
+        </div>
+        
+        <div class="slider-open-button-container data-open-container">
+          <input type="image" src="images/cells.png" class="slider-open-button data-button"></input>
+        </div>
+      </div>
+    </div>
+    
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
+
+<a href="https://www.flaticon.com/free-icons/clock" title="clock icons">Clock icons created by Those Icons - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/table" title="table icons">Table icons created by Pixel perfect - Flaticon</a>
 </html>
