@@ -1,7 +1,8 @@
 // script.js
-import { initializeMap } from "./map_create.js";
-import { loadMeterData, loadStreetData } from "./data_load.js";
-import { initializeStreets } from "./street_create.js";
+import { initializeMap } from './map_create.js';
+import { loadMeterData, loadStreetData } from './data_load.js';
+import { initializeStreets } from './street_create.js';
+import { initializeSlider } from './slider.js';
 
 // Event bus
 const eventBus = new EventTarget(); 
@@ -16,4 +17,5 @@ const streetData = await loadStreetData(eventBus);
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
 
-// Test comment
+// Enable slider button
+initializeSlider(document.querySelector('time-slider'), eventBus);
