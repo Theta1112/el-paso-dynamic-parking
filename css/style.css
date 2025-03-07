@@ -8,15 +8,13 @@ body, html {
 #map {
     width: 100%;
     height: 100vh;
-    z-index: -1;
+    z-index: 1;
 }
 
-.time-slider {
-  
+.slider { 
   position: absolute;
   
   left: -435px;
-  top: 15%;
   
   height: 50px;
   width: 500px;
@@ -27,12 +25,24 @@ body, html {
   border-style: solid;
   border-color: black;
 
-  background-color: teal;
-
   transition: left 1s;
 
   display: grid;
-  grid-template-columns: 1fr 400px 65px ;
+  grid-template-columns: 1fr 400px 67px ;
+
+  z-index: 10000;
+}
+
+.time-slider {
+  top: 15%;
+
+  background-color: grey;
+}
+
+.data-slider {
+  top: 25%;
+
+  background-color: grey;
 }
 
 .slider-open {
@@ -51,7 +61,6 @@ body, html {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-
 }
 
 .slider-open-button-container {
@@ -60,7 +69,17 @@ body, html {
 
   height: 100%;
 
+  border-style: solid;
+  border-color: black;
+  border-width: 0 0 0 2px ;
+}
+
+.time-open-container {
   background-color: #d9534f;
+}
+
+.data-open-container {
+  background-color: teal;
 }
 
 .slider-open-button {
