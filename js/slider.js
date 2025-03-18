@@ -1,14 +1,14 @@
-function initializeTimeSlider(timeSliderEl, eventBus) {
+function initializeSideSlider(sideSliderEl, eventBus) {
 
   // Get slider button
-  const openButtonEl = timeSliderEl.querySelector('slider-open-button');
+  const openButtonEl = sideSliderEl.querySelector('.slider-open-button');
 
   // Function to open slider if closed and vice versa
   function toggleSlider() {
-    if (timeSliderEl.classList.contains('slider-open')) {
-      timeSliderEl.classList.remove('slider-open');
+    if (sideSliderEl.classList.contains('slider-open')) {
+      sideSliderEl.classList.remove('slider-open');
     } else {
-      timeSliderEl.classList.add('slider-open');
+      sideSliderEl.classList.add('slider-open');
     }
   }
 
@@ -17,4 +17,4 @@ function initializeTimeSlider(timeSliderEl, eventBus) {
 
 }
 
-export { initializeTimeSlider }
+export { initializeSideSlider }
