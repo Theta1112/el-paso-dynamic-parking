@@ -13,11 +13,6 @@ body, html {
 
 .slider { 
   position: absolute;
-  
-  left: -435px;
-  
-  height: 50px;
-  width: 500px;
 
   overflow: hidden;
 
@@ -25,12 +20,21 @@ body, html {
   border-style: solid;
   border-color: black;
 
+  z-index: 10000;
+}
+
+.left-slider { 
+  position: absolute;
+  
+  left: -435px;
+  
+  height: 50px;
+  width: 500px;
+
   transition: left 1s;
 
   display: grid;
   grid-template-columns: 1fr 400px 67px ;
-
-  z-index: 10000;
 }
 
 .time-slider {
@@ -130,4 +134,58 @@ body, html {
 /* When Enter is pressed, move the screen up out of view */
 .slide-up {
   transform: translateY(-100vh);
+}
+
+.graph-slider {
+  border-radius: 20px;
+
+  height: 380px;
+  left: 0;
+  bottom: -350px; /* Keep magnitude 30 less than height. 30 references the height of the first grid row. */
+
+  display: grid;
+  grid-template-rows: 30px 260px 1fr ;
+
+  transition: bottom 1s;
+
+  background-color: lightgrey;
+}
+
+.graph-container {
+  grid-row: 2;
+
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.graph-slider-open-button-container {
+
+  grid-row: 1;
+
+  height: 100%;
+
+  background-color: grey;
+}
+
+.graph-slider-open-button {
+
+  height: 100%;
+  width: 100%;
+
+  background-color: grey;
+
+  text-align: center;
+  line-height: 20px;
+
+  border-style: solid;
+  border-color: black;
+  border-width: 0 0 2px 0 ;
+}
+
+.graph-slider-up {
+  bottom: -80px;
+
+  transition: bottom 1s;
 }

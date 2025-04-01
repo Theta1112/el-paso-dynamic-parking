@@ -17,4 +17,23 @@ function initializeSideSlider(sideSliderEl, eventBus) {
 
 }
 
-export { initializeSideSlider }
+function initializeGraphSlider(graphSliderEl, eventBus) {
+
+  // Get slider button
+  const openButtonEl = graphSliderEl.querySelector('.graph-slider-open-button');
+
+  // Function to open slider if closed and vice versa
+  function toggleGraphSlider() {
+    if (graphSliderEl.classList.contains('graph-slider-up')) {
+      graphSliderEl.classList.remove('graph-slider-up');
+    } else {
+      graphSliderEl.classList.add('graph-slider-up');
+    }
+  }
+
+  // Enable button to toggle slider
+  openButtonEl.addEventListener('click', toggleGraphSlider)
+
+}
+
+export { initializeSideSlider, initializeGraphSlider }

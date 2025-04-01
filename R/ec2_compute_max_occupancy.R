@@ -62,7 +62,7 @@ compute.bucket.occupancy <- function(data, progress = F) {
 
 monthwise.occupancy <- function(cleaned.transactions, progress = T) {
   
-  for (i in 9:12) {
+  for (i in 12:12) {
     
     if (progress) {
       print(paste("EXECUTING MONTH:", i))

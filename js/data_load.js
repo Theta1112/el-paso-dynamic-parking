@@ -29,9 +29,35 @@ async function loadStreetData(eventBus) {
   }
 }
 
+// Load historical data
+// sourced from https://hasnode.byrayray.dev/convert-a-csv-to-a-javascript-array-of-objects-the-practical-guide
+async function loadHistoryData(eventBus) {
+
+  const response = await fetch('app_data/jan_data.csv');
+
+  const responseText = await response.text();
+
+  const [rawKeys, ...rest] = responseText
+      .trim()
+      .split("\n")
+      .map((item) => item.split(","));
+
+  const keys = rawKeys.map((key) => key.replaceAll('\"', "").replaceAll('\r', ""));
+
+  console.log(keys);
+
+  const formedArr = rest.map((item) => {
+      const object = {};
+      keys.forEach((key, index) => (object[key] = item.at(index)));
+      return object;
+    });
+  
+  return formedArr;
+}
+
 // Helper function to check if an object is empty
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
 
-export { loadMeterData, loadStreetData };
+export { loadMeterData, loadStreetData, loadHistoryData };
