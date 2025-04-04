@@ -28,12 +28,12 @@ meters$street.ID <- raw.streets[st_nearest_feature(meters, raw.streets),"street.
 cleaned.transactions <- raw.data %>% 
   mutate(timestamp = dmy_hm(datetime),
          date = dmy(date),
-         min_paid = max(min_paid, 0))
+         min_paid = ifelse(min_paid < 0, 0, min_paid))
 
 # Assign transaction ID
 cleaned.transactions$transaction.ID <- seq(1, dim(raw.data)[1])
 
-write.csv(cleaned.transactions, "data/EC2_cleaned_transactions.csv.csv", row.names = F, append=FALSE)
+write.csv(cleaned.transactions, "data/EC2_cleaned_transactions.csv", row.names = F, append=FALSE)
 
 write.csv(meters %>% 
             dplyr::select(meter.ID, street.ID) %>%

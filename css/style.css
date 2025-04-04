@@ -140,6 +140,7 @@ body, html {
   border-radius: 20px;
 
   height: 380px;
+  width: 400px;
   left: 0;
   bottom: -350px; /* Keep magnitude 30 less than height. 30 references the height of the first grid row. */
 

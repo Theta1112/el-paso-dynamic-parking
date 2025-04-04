@@ -1,7 +1,19 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-function initializeGraph(graphEl, data) {
-  // console.log(d3)
+function initializeGraph(graphEl, data, eventBus) {
+  // renderGraph(graphEl, data);
+
+  eventBus.addEventListener('street-clicked', (e) => {
+    const filteredData = data.filter((row) => row.street_ID == e.detail.streetID);
+
+    renderGraph(graphEl, filteredData);
+  })
+} 
+
+function renderGraph(graphEl, data) {
+
+  // Clear existing graph
+  graphEl.innerHTML = '';
 
   // Declare the chart dimensions and margins.
   const width = 500;
@@ -20,7 +32,7 @@ function initializeGraph(graphEl, data) {
     return(d);
   } )
 
-  console.log(cleanData)
+  // console.log(cleanData)
 
   // Declare the x (horizontal position) scale.
   const x = d3.scaleUtc(d3.extent(cleanData, d => d.timestamp), [marginLeft, width - marginRight]);
@@ -68,6 +80,6 @@ function initializeGraph(graphEl, data) {
   )
 
   graphEl.append(svg.node());
-} 
+}
 
 export { initializeGraph }

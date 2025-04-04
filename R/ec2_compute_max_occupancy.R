@@ -5,8 +5,6 @@ library(lubridate)
 
 cleaned.transactions = fread("data/EC2_cleaned_transactions.csv")
 
-meters = fread("data/EC2_meter_minimal.csv")
-
 # Splits each parking instance into a series of buckets
 compute.bucket.occupancy <- function(data, progress = F) {
   
@@ -20,6 +18,11 @@ compute.bucket.occupancy <- function(data, progress = F) {
     row.bucket.count <- data[i,"min_paid"][[1]] / 15
     
     row.occupancy.buckets <- data[i,"start.by15"][[1]] + minutes(15 * seq(0, row.bucket.count))
+    
+    if (progress) {
+      print(data[i, "min_paid"][[1]])
+      print(row.bucket.count)
+    }
     
     if (i == 1) {
       occupancy.buckets <- row.occupancy.buckets
@@ -62,7 +65,7 @@ compute.bucket.occupancy <- function(data, progress = F) {
 
 monthwise.occupancy <- function(cleaned.transactions, progress = T) {
   
-  for (i in 12:12) {
+  for (i in 1:12) {
     
     if (progress) {
       print(paste("EXECUTING MONTH:", i))
@@ -82,26 +85,8 @@ monthwise.occupancy <- function(cleaned.transactions, progress = T) {
       summarise(occupied = n()) %>%
       arrange(meter.ID, occupancy.buckets)
     
-    # Join to streets via meters
-    month.occupancy <- month.bucketed %>%
-      left_join(meters) %>%
-      group_by(street.ID, occupancy.buckets) %>%
-      summarise(street_occupied = n()) %>%
-      arrange(street.ID)
-    
-    # Find max occupancy of each street
-    month.max <- month.occupancy %>%
-      group_by(street.ID) %>%
-      summarise(max_occupied = max(street_occupied))
-    
-    # Normalise
-    month.norm <- month.occupancy %>%
-      left_join(month.max) %>%
-      filter(!is.na(street.ID)) %>%
-      mutate(occupied_fraction = street_occupied / max_occupied)
-    
     # Write normalised output
-    write.csv(month.norm, 
+    write.csv(month.bucketed, 
              paste0("output/month_",i,"_occupancy_normalised.csv"), 
              row.names = F, append=FALSE)
   }

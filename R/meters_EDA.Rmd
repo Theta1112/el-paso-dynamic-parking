@@ -21,9 +21,9 @@ mapbox.apikey = readChar("secure/mapbox.txt", file.info("secure/mapbox.txt")$siz
 
 ```{r load-data}
 # Read raw meter transaction data
-raw.data <- rbind(fread("data/pems transactions jan-jun2024.csv"),
-                  fread("data/pems transactions jul-dec2024.csv")) %>%
-  rename(meter.ID = "name")
+# raw.data <- rbind(fread("data/pems transactions jan-jun2024.csv"),
+#                   fread("data/pems transactions jul-dec2024.csv")) %>%
+#   rename(meter.ID = "name")
 
 # Read street data geojson (derived from shape file)
 raw.streets <- st_read("data/EPCenterline.geojson") %>%
@@ -31,8 +31,13 @@ raw.streets <- st_read("data/EPCenterline.geojson") %>%
   rename(street.ID = "OBJECTID_1")
 
 # Read street with nov transaction data
-nov.streets <- st_read("data/nov_occupancy_normalised.geojson") %>%
-  mutate(timestamp = ymd_hms(occupancy.buckets))
+data <- fread("data/12_months.csv") %>%
+  mutate(date = date(occupancy.buckets),
+         hour = hour(ymd_hms(occupancy.buckets, quiet = F)),
+         minute = minute(ymd_hms(occupancy.buckets, quiet = F)),
+         hour = replace_na(hour, 0),
+         minute = replace_na(minute, 0),
+         timestamp = date + hours(hour) + minutes(minute))
 
 # Read meters data geojson (derived from shape file)
 meters <- st_read("data/meters.geojson")%>%
@@ -80,23 +85,24 @@ ggplot(data = transactions.agg %>%
 ```
 
 ```{r compare_max_parking}
-colnames(excel_estimates)
+
 excel.estimates <- raw.excel.estimates %>%
   rename(street.ID = "OBJECTID_1",
          estimated.capacity = "est_parking") %>%
   st_drop_geometry()
 
-nov.streets.sorted <- nov.streets %>%
+data.sorted <- data %>%
   arrange(occupancy.buckets) %>%
   st_drop_geometry()
 
-compare_capacity <- nov.streets.sorted %>%
-  distinct(street.ID, max_occupied) %>%
+compare_capacity <- data.sorted %>%
+  rename(historical_per = "per_100") %>%
+  distinct(street.ID, historical_per) %>%
   left_join(excel.estimates) %>%
-  mutate(under.utilized = estimated.capacity > max_occupied)
+  mutate(under.utilized = estimated.capacity > historical_per)
 
 ggplot(data = compare_capacity) + 
-  geom_point(aes(y = estimated.capacity, x = max_occupied, colour = under.utilized)) +
+  geom_point(aes(y = estimated.capacity, x = historical_per, colour = under.utilized)) +
   scale_color_manual(values = c("red", "blue"), guide="none") + 
   geom_abline(aes(intercept=0, slope=1)) + 
   annotate("text", x = 25, y = 30, label = "Underutilized", colour = "blue") + 
@@ -110,30 +116,29 @@ ggplot(data = compare_capacity) +
 streets <- raw.streets %>%
   right_join(compare_capacity) 
 
-ggplot(data = nov.streets %>% 
+ggplot(data = data %>% 
          filter(!is.na(timestamp)) %>%
          filter(wday(timestamp) != 1) %>%
-         filter(street.ID == 8888)) + 
-  geom_line(aes(x = timestamp, y = occupied_fraction)) +
+         filter(month(timestamp) == 3 & day(timestamp) == 16) %>%
+         filter(street.ID == 12397)) + 
+  geom_line(aes(x = timestamp, y = occupied_fraction_99)) +
   geom_abline(aes(intercept=0.8, slope=0), colour = "red") + 
-  labs(y = "Occupancy Rate", x = "November Time Buckets")
+  labs(y = "Occupancy Rate", x = "One day occupancy")
 
 ```
 
 ```{r compute-toc, fig.height=11, fig.width=11}
 
-nov.toc <- nov.streets %>%
-  mutate(over.capacity = occupied_fraction > 0.8) %>%
-  st_drop_geometry() %>%
+data.toc <- data %>%
+  mutate(over.capacity = occupied_fraction_99 > 0.8) %>%
+  group_by(street.ID, date) %>%
+  summarise(toc = sum(over.capacity)) %>%
+  arrange(desc(toc))
+
+data.toc %>%
   group_by(street.ID) %>%
-  summarise(toc = 15 * sum(over.capacity)) %>%
-  ungroup()
-
-nov.toc <- streets %>%
-  right_join(nov.toc)
-
-st_write(nov.toc, "data/nov_toc.geojson", row.names = F, append=FALSE)
-
+  summarise(max_toc = max(toc)) %>%
+  arrange(desc(max_toc))
 ```
 
 ```{r toc-plot}

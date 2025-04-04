@@ -23,8 +23,6 @@ const historyData = await loadHistoryData(eventBus);
 
 const testData = historyData.filter((e) => e.street_ID == '721');
 
-console.log(testData.map(d => d.street_occupied));
-
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
 
@@ -36,4 +34,4 @@ initializeSideSlider(document.querySelector('.data-slider'), eventBus);
 initializeGraphSlider(document.querySelector('.graph-slider'), eventBus);
 
 // Initialize graph
-initializeGraph(document.querySelector('.graph'), testData)
+initializeGraph(document.querySelector('.graph'), historyData, eventBus)

@@ -49,10 +49,10 @@ function initializeStreets(map, meterData, streetData, eventBus) {
       };
     },
       onEachFeature: function (feature, layer) {
-        let props = feature.properties;
-        let utilizationStatus = props["under.utilized"] ? "Under Utilized" : "Optimally Utilized";
+        const props = feature.properties;
+        const utilizationStatus = props["under.utilized"] ? "Under Utilized" : "Optimally Utilized";
 
-        let popupContent = `
+        const popupContent = `
           <b>Street Name:</b> ${props.STREETNAME ?? 'N/A'} ${props.STYPE ?? ''} <br>
           <b>Street ID:</b> ${props["street.ID"] ?? 'N/A'} <br>
           <b>Total Occupancy:</b> ${props.total_occupied ?? 'N/A'} <br>
@@ -78,6 +78,13 @@ function initializeStreets(map, meterData, streetData, eventBus) {
           },
           click: function (e) {
             map.fitBounds(e.target.getBounds());
+
+            // response submitted to firebase
+            const streetClicked = new CustomEvent('street-clicked', { detail: { streetID: props["street.ID"] }});
+
+            eventBus.dispatchEvent(streetClicked);
+
+            console.log("clicked street.ID = " + props["street.ID"]);
           }
         });
       }
