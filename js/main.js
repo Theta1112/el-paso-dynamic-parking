@@ -6,6 +6,8 @@ import { initializeStreets } from './street_create.js';
 import { initializeSideSlider } from './slider.js';
 import { initializeGraph } from './graph_hist.js';
 import { initializeHeatmap } from './graph_heatmap.js';
+import { initializeDistrictSelect } from './district_select.js';
+import { initializeStatControl } from './stat_control.js';
 
 
 // Event bus
@@ -34,3 +36,8 @@ initializeHeatmap(document.querySelector('#occupancyheatmap'), occupancyData, ev
 // Enable slider button
 //initializeSideSlider(document.querySelector('.time-slider'), eventBus);
 //initializeSideSlider(document.querySelector('.data-slider'), eventBus);
+
+
+initializeDistrictSelect(document.querySelector('.district-select'), eventBus);
+
+initializeStatControl(document.querySelector('#avg-occ'), eventBus);
