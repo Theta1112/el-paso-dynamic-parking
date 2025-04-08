@@ -35,14 +35,19 @@
       <div class="summary-box">60%<br><small>Avg. Occupancy</small></div>
       <div class="summary-box">$100K<br><small>Total Revenue</small></div>
       <div class="summary-box">5<br><small>Underused Streets</small></div>
+      <div class="summary-box">5<br><small>Underused stuff</small></div>
 
       <button id="print-report">Print Report</button>
     </div>
 
     <div id="charts">
       <div id="occupancy-trend" class="chart-box">Occupancy Trend (Line)</div>
-      <div id="heatmap" class="chart-box">Occupancy Heatmap</div>
-      <div id="bar-chart" class="chart-box">Parking Duration Distribution</div>
+      <div id="heatmap" class="chart-box">Occupancy Heatmap
+        <div id="occupancyheatmap"></div>
+      </div>
+      <div id="bar-chart" class="chart-box">Parking Duration Distribution
+        <div id="durationhist"></div>
+      </div>
     </div>
 
     <div id="map-section">

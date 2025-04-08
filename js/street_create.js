@@ -15,7 +15,7 @@ function initializeStreets(map, meterData, streetData, eventBus) {
     },
     onEachFeature: function (feature, layer) {
       if (feature.properties) {
-        let popupContent = `
+        /**let popupContent = `
           <b>Location ID:</b> ${feature.properties.LocationID ?? 'N/A'} <br>
           <b>Street:</b> ${feature.properties.Street ?? 'N/A'} <br>
           <b>Total Revenue:</b> $${feature.properties.TotRev ?? 'N/A'}
@@ -35,7 +35,7 @@ function initializeStreets(map, meterData, streetData, eventBus) {
             mouseout: function (e) {
               meterLayer.resetStyle(e.target);
             }
-        });
+        });*/
       }
     }
   }).addTo(map);
@@ -43,12 +43,12 @@ function initializeStreets(map, meterData, streetData, eventBus) {
   var streetLayer = L.geoJSON(streetData, {
     style: function (feature) {
       return {
-        color: getColor(feature.properties["under.utilized"]),
+        color: getColor(feature.properties["cluster"]),
         weight: 4,
         opacity: 0.8
       };
     },
-      onEachFeature: function (feature, layer) {
+      /** onEachFeature: function (feature, layer) {
         let props = feature.properties;
         let utilizationStatus = props["under.utilized"] ? "Under Utilized" : "Optimally Utilized";
 
@@ -80,15 +80,25 @@ function initializeStreets(map, meterData, streetData, eventBus) {
             map.fitBounds(e.target.getBounds());
           }
         });
-      }
+      }*/
   }).addTo(map);
 
   map.fitBounds(streetLayer.getBounds()); // Adjust map view to the data
 }
 
 // Helper function to get color based on under.utilized status
-function getColor(underUtilized) {
-  return underUtilized ? 'red' : 'yellow';
+function getColor(cluster) {
+
+  const colors = ['#e41a1c',
+  '#377eb8',
+  '#4daf4a',
+  '#984ea3',
+  '#ff7f00',
+  '#f781bf',
+  '#a65628',
+  '#999999'];
+
+  return colors[parseInt(cluster)-1];
 }
 
 export { initializeStreets };
