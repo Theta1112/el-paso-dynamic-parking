@@ -1,48 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale = 1.0">
-    <title>Parking Meters Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale = 1.0">
+  <title>Parking Meters Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="main">
-      <div id="map"></div>
-      <div class="time-slider slider">
 
-        <div class="slider-filter-container">
-          <input type="image" src="images/clock.png" class="filter-button button-1"></input>
-          <input type="image" src="images/clock.png" class="filter-button button-2"></input>
-          <input type="image" src="images/clock.png" class="filter-button button-3"></input>
-        </div>
-        
-        <div class="slider-open-button-container time-open-container">
-          <input type="image" src="images/clock.png" class="slider-open-button time-button"></input>
-        </div>
+  <div id="dashboard-grid">
+    <!-- HEADER -->
+    <div id="header">
+      <div id="logo">EP</div>
+      <h1 id="dashboard-title">El Paso DPP Dashboard</h1>
+    </div>
+
+    <div id="sidebar">
+      <!-- Removed: Period filter -->
+      <div class="filter-group">
+        <label>Year</label>
+        <select>
+          <option>2024</option>
+          <option>2025</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>District</label>
+        <select>
+          <option>All</option>
+        </select>
       </div>
 
-      <div class="data-slider slider">
+      <div class="summary-box">60%<br><small>Avg. Occupancy</small></div>
+      <div class="summary-box">$100K<br><small>Total Revenue</small></div>
+      <div class="summary-box">5<br><small>Underused Streets</small></div>
+      <div class="summary-box">5<br><small>Underused stuff</small></div>
 
-        <div class="slider-filter-container">
-          <input type="image" src="images/cells.png" class="filter-button button-1"></input>
-          <input type="image" src="images/cells.png" class="filter-button button-2"></input>
-          <input type="image" src="images/cells.png" class="filter-button button-3"></input>
-          <input type="image" src="images/cells.png" class="filter-button button-4"></input>
-        </div>
-        
-        <div class="slider-open-button-container data-open-container">
-          <input type="image" src="images/cells.png" class="slider-open-button data-button"></input>
-        </div>
+      <button id="print-report">Print Report</button>
+    </div>
+
+    <div id="charts">
+      <div id="occupancy-trend" class="chart-box">Occupancy Trend (Line)</div>
+      <div id="heatmap" class="chart-box">Occupancy Heatmap
+        <div id="occupancyheatmap"></div>
+      </div>
+      <div id="bar-chart" class="chart-box">Parking Duration Distribution
+        <div id="durationhist"></div>
       </div>
     </div>
-    
 
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script type="module" src="js/main.js"></script>
+    <div id="map-section">
+      <div id="map"></div>
+      <div id="map-legend">
+        <strong>Suggested Policy</strong><br>
+        <div>▇ Increase</div>
+        <div>▇ Maintain</div>
+        <div>▇ Decrease</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
-
-<a href="https://www.flaticon.com/free-icons/clock" title="clock icons">Clock icons created by Those Icons - Flaticon</a>
-<a href="https://www.flaticon.com/free-icons/table" title="table icons">Table icons created by Pixel perfect - Flaticon</a>
 </html>

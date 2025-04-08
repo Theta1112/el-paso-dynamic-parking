@@ -1,111 +1,151 @@
 body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* === Dashboard Layout === */
+#dashboard-grid {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "sidebar charts map"
+    "sidebar charts map";
+  grid-template-columns: 250px 1fr 2fr;
+  grid-template-rows: 60px 1fr 1fr;
+  height: 100vh;
+  width: 100vw;
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+/* === Header === */
+#header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  background-color: #004080;
+  color: white;
+  padding: 10px 20px;
+  z-index: 1;
+}
+
+#logo {
+  background-color: white;
+  color: #004080;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+}
+
+#dashboard-title {
+  font-size: 1.5em;
+  margin: 0;
+}
+
+/* === Sidebar === */
+#sidebar {
+  grid-area: sidebar;
+  background-color: #f0f0f0;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 4px;
+}
+
+.summary-box {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+.summary-box small {
+  display: block;
+  font-size: 0.8em;
+  color: #555;
+}
+
+#print-report {
+  margin-top: auto;
+  padding: 10px;
+  font-weight: bold;
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* === Charts === */
+#charts {
+  grid-area: charts;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-box {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  flex: 1;
+}
+
+/* === Map === */
+#map-section {
+  grid-area: map;
+  position: relative;
+  background-color: #eee;
 }
 
 #map {
-    width: 100%;
-    height: 100vh;
-    z-index: 1;
-}
-
-.slider { 
-  position: absolute;
-  
-  left: -435px;
-  
-  height: 50px;
-  width: 500px;
-
-  overflow: hidden;
-
-  border-radius: 40px;
-  border-style: solid;
-  border-color: black;
-
-  transition: left 1s;
-
-  display: grid;
-  grid-template-columns: 1fr 400px 67px ;
-
-  z-index: 10000;
-}
-
-.time-slider {
-  top: 15%;
-
-  background-color: grey;
-}
-
-.data-slider {
-  top: 25%;
-
-  background-color: grey;
-}
-
-.slider-open {
-  left: -25px;
-  transition: left 1s;
-}
-
-.slider-filter-container {
-
-  grid-column: 2;
-
-  height: 50px;
-  width: 400px;
-  right: 65px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-}
-
-.slider-open-button-container {
-
-  grid-column: 3;
-
   height: 100%;
-
-  border-style: solid;
-  border-color: black;
-  border-width: 0 0 0 2px ;
+  width: 100%;
+  z-index: 1;
 }
 
-.time-open-container {
-  background-color: #d9534f;
-}
-
-.data-open-container {
-  background-color: teal;
-}
-
-.slider-open-button {
-  height: 80%;
+#map-legend {
   position: absolute;
-  right: 15px;
-  top: 5px;
+  bottom: 10px;
+  left: 10px;
+  background-color: white;
+  padding: 8px;
+  font-size: 0.9em;
+  border: 1px solid #ccc;
+  z-index: 10;
 }
 
-.filter-button {
-  height: 40px;
-}
-
-.utilization-status {
-    font-weight: bold;
-    font-size: 1.4em;
-    color: #d9534f;
-}
-
+/* === First Screen Overlay === */
 #first-screen {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 128, 0.9); /* Navy color with transparency */
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 128, 0.9);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -113,8 +153,8 @@ body, html {
   color: yellow;
   font-size: 24px;
   text-align: center;
-  z-index: 10000;
-  transition: transform 0.5s ease-in-out; /* Enables smooth sliding animation */
+  z-index: 9999;
+  transition: transform 0.5s ease-in-out;
 }
 
 #first-screen h1 {
@@ -127,7 +167,7 @@ body, html {
   color: white;
 }
 
-/* When Enter is pressed, move the screen up out of view */
+/* Slide-out transition */
 .slide-up {
   transform: translateY(-100vh);
 }
