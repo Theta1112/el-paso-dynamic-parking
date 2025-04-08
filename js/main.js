@@ -1,10 +1,10 @@
 // script.js
 import { initializeFirstScreen } from './first_screen.js';
 import { initializeMap } from './map_create.js';
-import { loadMeterData, loadStreetData, loadHistoryData } from './data_load.js';
+import { loadMeterData, loadStreetData, loadHistoryData, loadDurationData, loadOccupancyData } from './data_load.js';
 import { initializeStreets } from './street_create.js';
 import { initializeSideSlider, initializeGraphSlider } from './slider.js';
-import { initializeGraph } from './graph.js';
+import { initializeGraph } from './graph_heatmap.js';
 
 
 // Event bus
@@ -20,8 +20,9 @@ var map = initializeMap(document.querySelector('#map'), eventBus);
 const meterData = await loadMeterData(eventBus);
 const streetData = await loadStreetData(eventBus);
 const historyData = await loadHistoryData(eventBus);
+const durationData = await loadDurationData(eventBus);
+const occupancyData = await loadOccupancyData(eventBus);
 
-const testData = historyData.filter((e) => e.street_ID == '721');
 
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
@@ -34,4 +35,4 @@ initializeSideSlider(document.querySelector('.data-slider'), eventBus);
 initializeGraphSlider(document.querySelector('.graph-slider'), eventBus);
 
 // Initialize graph
-initializeGraph(document.querySelector('.graph'), historyData, eventBus)
+initializeGraph(document.querySelector('.graph'), occupancyData, eventBus)

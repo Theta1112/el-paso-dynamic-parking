@@ -190,3 +190,8 @@ body, html {
 
   transition: bottom 1s;
 }
+
+.graph {
+  display: flex;
+  justify-content: center;
+}

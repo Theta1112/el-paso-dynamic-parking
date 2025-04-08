@@ -1,0 +1,120 @@
+---
+title: "Markdown"
+author: "El Paso Team"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE, warning=FALSE}
+
+# Load required libraries
+library(sf)
+library(dplyr)
+library(lubridate)
+library(tidyverse)
+library(data.table)
+
+# -------------------------------
+# 1. Foot Traffic Data
+# -------------------------------
+
+foot_traffic_file <- "/Users/macytrout/Desktop/El Paso Parking Data/Mobility Data Cincinnati Area Businesses/Home Locations-DESKTOP-MO52HOV.csv"
+foot_traffic_df <- read_csv(foot_traffic_file)
+# Check the data
+head(foot_traffic_df)
+
+# -------------------------------
+# 2. 12-Month Occupancy Data
+# -------------------------------
+occupancy_file <- "data/12_months.csv"
+occupancy_12month_df <- read_csv(occupancy_file)
+# Check the data
+head(occupancy_12month_df)
+
+# -------------------------------
+# 3. PEM Transactions Data
+# -------------------------------
+pems_file1 <- "/Users/macytrout/Desktop/El Paso Parking Data/pems transactions jan-jun2024.csv"
+pems_file2 <- "/Users/macytrout/Desktop/El Paso Parking Data/pems transactions jul-dec2024.csv"
+pems_transactions_df <- rbind(
+  fread(pems_file1),
+  fread(pems_file2)
+)
+# Optional: Remove erroneous rows if needed
+pems_transactions_df <- pems_transactions_df %>% filter(row_number() != 839435)
+# Check the data
+head(pems_transactions_df)
+
+# -------------------------------
+# 4. Streets Data (EPCenterline.geojson)
+# -------------------------------
+streets_geojson_path <- "/Users/macytrout/Desktop/El Paso Parking Data/EPCenterline.geojson"
+streets_sf <- st_read(streets_geojson_path)
+# Check the data
+print(streets_sf)
+
+# -------------------------------
+# 5. Meters Data (meters.geojson)
+# -------------------------------
+meters_geojson_path <- "/Users/macytrout/Desktop/El Paso Parking Data/Meters Shapefile/meters.geojson"
+meters_sf <- st_read(meters_geojson_path)
+# Check the data
+print(meters_sf)
+
+```
+
+
+```{r}
+
+# 1. Convert datetime and extract date/time columns
+transactions_date_df <- pems_transactions_2024 %>%
+  mutate(
+    # Convert 'datetime' column to a proper datetime object
+    datetime_parsed = mdy_hm(datetime),
+    # Separate date and time
+    date_only = format(datetime_parsed, "%m/%d/%Y"),
+    time_only = format(datetime_parsed, "%H:%M")
+  )
+
+# 2. Calculate average minutes paid per weekday (excluding Sunday)
+avg_min_per_dayweek <- pems_transactions_2024 %>%
+  group_by(dayweek) %>%
+  summarise(
+    total_min = sum(min_paid, na.rm = TRUE),
+    unique_days = n_distinct(date)
+  ) %>%
+  mutate(
+    # Round average minutes per unique day
+    avg_min_per_day = round(total_min / unique_days),
+    # Factor dayweek in a logical order
+    dayweek = factor(dayweek, levels = c(
+      "Monday", "Tuesday", "Wednesday", "Thursday",
+      "Friday", "Saturday", "Sunday"
+    ))
+  ) %>%
+  arrange(dayweek) %>%
+  # Optional: Exclude Sunday if desired
+  filter(dayweek != "Sunday") %>%
+  # Add a day category (Weekday vs. Weekend)
+  mutate(day_category = case_when(
+    dayweek %in% c("Monday", "Tuesday", "Wednesday", "Thursday") ~ "Weekday",
+    dayweek %in% c("Friday", "Saturday") ~ "Weekend"
+  ))
+
+# Check the final data frames
+head(transactions_date_df)
+head(avg_min_per_dayweek)
+
+```
+

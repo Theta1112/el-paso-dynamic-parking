@@ -25,7 +25,8 @@ streets.sf <- st_read("data/EPCenterline.geojson") %>%
 
 data <- data.raw %>% 
   filter(!is.na(street.ID)) %>%
-  filter(hour >= 8 & hour < 18)
+  filter(hour >= 8 & hour < 18) %>%
+  filter(wday(timestamp) != 1)
 
 
 
@@ -100,29 +101,48 @@ kmeans_streets <- function(clustering.data, k, gif = 1, streets.sf = NA, seed = 
   return(clustering.data)
 }
 
+
+plot.cluster.patterns <- function(data.clustered, input.dotw) {
+  
+  cluster.grouped <- data.clustered %>% 
+    mutate(dotw = wday(timestamp)) %>%
+    group_by(hour, street.ID, dotw, cluster)
+  
+  p <- ggplot(data = cluster.grouped %>%
+                filter(dotw == input.dotw) %>%
+                summarise(occupied_fraction = mean(occupied_fraction_95))) +
+    geom_line(aes(x = hour, 
+                  y = occupied_fraction, 
+                  group = street.ID, 
+                  color = cluster)) +
+    scale_color_manual(values = COLOUR.VEC) + 
+    geom_line(data = cluster.grouped %>%
+                group_by(hour, dotw, cluster) %>%
+                filter(dotw == input.dotw) %>%
+                summarise(occupied_fraction = mean(occupied_fraction_95)),
+              aes(x = hour, y = occupied_fraction), color = "black", size = 1.8) + 
+    geom_vline(xintercept = 18, linetype="dashed") + 
+    facet_wrap(~cluster)
+  
+  print(p)
+}
+
+
 # kmeans.ss = numeric()
 # for (i in 1:8) {
 #  kmeans.ss <- c(kmeans.ss, kmeans(streets %>% select(-street.ID), i)$tot.withinss)
 #}
 
-
 # Prepare data for clustering operation
 clustering.data <- prepare.clustering.data(data, streets.sf)
 
 # Execute clustering
-clustered <- kmeans_streets(clustering.data, 7, gif = 5, streets.sf, 123)
+clustered <- kmeans_streets(clustering.data, 6, gif = 4, streets.sf, 123)
 
 # Aggregate and join back to data
-data.clustered <- data %>%
+data.clustered <- data.raw %>% 
+  filter(!is.na(street.ID)) %>%
   left_join(clustered %>% dplyr::select(street.ID, cluster))
 
 # Plot out the occupancy pattern over a particular day across clusters
-ggplot(data = data.clustered %>% 
-         mutate(dotw = wday(timestamp)) %>%
-         group_by(hour, street.ID, dotw, cluster) %>%
-         filter(dotw == 3) %>%
-         summarise(occupied_fraction = mean(occupied_fraction_95))) +
-  geom_line(aes(x = hour, y = occupied_fraction, group = street.ID, color = cluster)) +
-  scale_color_manual(values = COLOUR.VEC) + 
-  facet_wrap(~cluster)
-
+plot.cluster.patterns(data.clustered, 4)
