@@ -20,16 +20,13 @@ const meterData = await loadMeterData(eventBus);
 const streetData = await loadStreetData(eventBus);
 const durationData = await loadDurationData(eventBus);
 const occupancyData = await loadOccupancyData(eventBus);
-const historyData = await loadHistoryData(eventBus);
+//const historyData = await loadHistoryData(eventBus);
 const avgClusterOccupancyData = await loadAvgClusterOccupancy(eventBus);
-
-console.log(historyData)
 
 initializeFirstScreen();
 
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
-console.log(occupancyData)
 
 initializeGraph(document.querySelector('#durationhist'), durationData, eventBus);
 initializeHeatmap(document.querySelector('#occupancyheatmap'), occupancyData, eventBus);
@@ -52,8 +49,3 @@ districtDropdown.addEventListener('change', (e) => {
 // Enable slider button
 //initializeSideSlider(document.querySelector('.time-slider'), eventBus);
 //initializeSideSlider(document.querySelector('.data-slider'), eventBus);
-
-
-initializeDistrictSelect(document.querySelector('.district-select'), eventBus);
-
-initializeStatControl(document.querySelector('#avg-occ'), eventBus);

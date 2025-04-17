@@ -20,4 +20,4 @@ function initializeDistrictSelector(eventBus, avgClusterOccupancyData) {
   });
 }
 
-export { initializeDistrictSelect }
+export { initializeDistrictSelector }
