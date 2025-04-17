@@ -1,6 +1,6 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-function initializeGraph(graphEl, data, eventBus) {
+function initializeHistogram(graphEl, data, eventBus) {
   renderGraph(graphEl, data, eventBus);
 
   eventBus.addEventListener('street-clicked', (e) => {
@@ -12,8 +12,8 @@ function initializeGraph(graphEl, data, eventBus) {
 
 function renderGraph(graphEl, rawData, eventBus) {
 
-  const margin = {top: 10, right: 30, bottom: 25, left: 40}
-  const width = 350 - margin.left - margin.right
+  const margin = {top: 10, right: 10, bottom: 25, left: 20}
+  const width = 300 - margin.left - margin.right
   const height = 200;
   const xAxisLabelHeight = 20;
   const yAxisLabelHeight = 20;
@@ -66,8 +66,8 @@ function renderGraph(graphEl, rawData, eventBus) {
     .enter()
     .append("rect")
       .attr("x", function(d) { return x(d.bucket) ; })
-      .attr("width", 15)
-      .attr("fill", "#69b3a2")
+      .attr("width", 12)
+      .attr("fill", "#004080")
       .attr("bucket", function(d) { return d.bucket ; })
       // no bar at the beginning thus:
       .attr("height", function(d) { return graphBottom - y(0); }) // always equal to 0
@@ -166,4 +166,4 @@ function renderGraph(graphEl, rawData, eventBus) {
 
 }
 
-export { initializeGraph }
+export { initializeHistogram }

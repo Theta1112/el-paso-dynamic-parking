@@ -51,14 +51,16 @@ async function loadHistoryData(eventBus) {
   return historyData;
 }
 
-// Load aggregated occupancy data
-async function loadOccupancyData(eventBus) {
+// Load aggregated heatmap data
+async function loadHeatmapData(eventBus) {
 
-  const occupancyData = await readCSV('app_data/average_occupancy.csv')
+  const occupancyData = await readCSV('app_data/heatmap.csv')
 
   // Convert strings to integers
   occupancyData.forEach((obj) => {
-    obj.occupancy = parseFloat(obj.occupancy)
+    obj.occupancy = parseFloat(obj.ave_occupancy)
+    obj.month = parseInt(obj.month)
+    obj.cluster = parseInt(obj.cluster)
     obj.dotw = parseInt(obj.dotw)
   });
 
@@ -115,4 +117,4 @@ async function readCSV(path) {
   return(formedArr)
 }
 
-export { loadMeterData, loadStreetData, loadDurationData, loadOccupancyData, loadHistoryData, loadAvgClusterOccupancy };
+export { loadMeterData, loadStreetData, loadDurationData, loadHeatmapData, loadHistoryData, loadAvgClusterOccupancy };

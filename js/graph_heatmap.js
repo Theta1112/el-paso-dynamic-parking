@@ -7,11 +7,13 @@ function initializeHeatmap(graphEl, data, eventBus) {
 
 function renderGraph(graphEl, data, eventBus) {
 
-  console.log(data)
+  const districtData = data.filter((e) => e.cluster == 1 & e.month == 1) 
 
-  const margin = {top: 10, right: 30, bottom: 25, left: 40}
-  const width = 300 - margin.left - margin.right
-  const height = 100;
+  console.log(districtData)
+
+  const margin = {top: 10, right: 30, bottom: 10, left: 40}
+  const width = 350 - margin.left - margin.right
+  const height = 140;
 
   // append the svg object to the body of the page
   var svg = d3.create("svg")
@@ -21,8 +23,8 @@ function renderGraph(graphEl, data, eventBus) {
     .attr("style", "max-width: 100%; max-height: 95%; height: auto; height: intrinsic;");
 
   // Labels of row and columns -> unique identifier of the column called 'group' and 'variable'
-  const myGroups = Array.from(new Set(data.map(d => d.dotw)))
-  const myVars = Array.from(new Set(data.map(d => d.tod)))
+  const myGroups = Array.from(new Set(districtData.map(d => d.dotw)))
+  const myVars = Array.from(new Set(districtData.map(d => d.tod)))
 
   // Build X scales and axis:
   const x = d3.scaleBand()
@@ -37,7 +39,7 @@ function renderGraph(graphEl, data, eventBus) {
 
   // Build Y scales and axis:
   const y = d3.scaleBand()
-    .range([ height, 0 ])
+    .range([ height, margin.top ])
     .domain(myVars)
     .padding(0.05);
   svg.append("g")
@@ -47,7 +49,7 @@ function renderGraph(graphEl, data, eventBus) {
 
   // Build color scale
   const myColor = d3.scaleSequential()
-    .interpolator(d3.interpolateInferno)
+    .interpolator(d3.interpolateRgb("#004080", "#FF8C00"))
     .domain([0,1])
 
   // create a tooltip
@@ -55,6 +57,7 @@ function renderGraph(graphEl, data, eventBus) {
     .append("div")
     .style("opacity", 0)
     .attr("class", "tooltip")
+    .style("position", "absolute")
     .style("background-color", "white")
     .style("border", "solid")
     .style("border-width", "2px")
@@ -63,17 +66,43 @@ function renderGraph(graphEl, data, eventBus) {
 
   // Three function that change the tooltip when user hover / move / leave a cell
   const mouseover = function(event,d) {
+
     tooltip
       .style("opacity", 1)
     d3.select(this)
       .style("stroke", "black")
       .style("opacity", 1)
   }
+
+  const hover = {x: 300, y: 300}
+
   const mousemove = function(event,d) {
+
+    if (event.x > 410) {
+      hover.x = event.x - 100
+    } else {
+      hover.x = event.x
+    }
+    
+    hover.y = event.y
+    //else {
+    //  hover.x = event.x
+    //}
+
+    //if (event.y < 300) {
+      //hover.y = event.y -20
+    //}
+
     tooltip
-      .html("Occupancy: " + d.occupancy )
-      .style("left", (event.x)/2 + "px")
-      .style("top", (event.y)/2 + "px")
+        .html(d.dotw_string + " " + d.tod + "<br>" + "Occupancy: " + Math.round(d.occupancy * 100) + "%" )
+        .style("font-size", "10px")
+        .style("left", hover.x + "px")
+        .style("top", hover.y + "px")
+        .style("opacity", 1)
+
+    //console.log("x: " + event.x + " y: " + event.y)
+
+    
   }
   const mouseleave = function(event,d) {
     tooltip
@@ -85,7 +114,7 @@ function renderGraph(graphEl, data, eventBus) {
 
   // add the squares
   svg.selectAll()
-    .data(data, function(d) {return d.dotw+':'+d.tod;})
+    .data(districtData, function(d) {return d.dotw+':'+d.tod;})
     .join("rect")
       .attr("x", function(d) { return x(d.dotw) })
       .attr("y", function(d) { return y(d.tod) })
@@ -100,24 +129,6 @@ function renderGraph(graphEl, data, eventBus) {
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
-
-// Add title to graph
-svg.append("text")
-        .attr("x", 0)
-        .attr("y", -50)
-        .attr("text-anchor", "left")
-        .style("font-size", "22px")
-        .text("A d3.js heatmap");
-
-// Add subtitle to graph
-svg.append("text")
-        .attr("x", 0)
-        .attr("y", -20)
-        .attr("text-anchor", "left")
-        .style("font-size", "14px")
-        .style("fill", "grey")
-        .style("max-width", 400)
-        .text("A short description of the take-away message of this chart.");
 
   graphEl.append(svg.node());
 

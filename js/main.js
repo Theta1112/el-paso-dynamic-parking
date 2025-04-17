@@ -1,13 +1,13 @@
 // script.js
 import { initializeFirstScreen } from './first_screen.js';
 import { initializeMap } from './map_create.js';
-import { loadDurationData, loadHistoryData, loadMeterData, loadOccupancyData, loadStreetData, loadAvgClusterOccupancy } from './data_load.js';
+import { loadDurationData, loadHistoryData, loadMeterData, loadHeatmapData, loadStreetData, loadAvgClusterOccupancy, loadLinegraphData } from './data_load.js';
 import { initializeStreets } from './street_create.js';
 import { initializeSideSlider } from './slider.js';
-import { initializeGraph } from './graph_hist.js';
+import { initializeHistogram } from './graph_hist.js';
 import { initializeHeatmap } from './graph_heatmap.js';
 import { initializeDistrictSelector } from './district_select.js';
-
+import { initializeLineGraph } from './graph_line.js';
 
 // Event bus
 const eventBus = new EventTarget(); 
@@ -19,17 +19,19 @@ var map = initializeMap(document.querySelector('#map'), eventBus);
 const meterData = await loadMeterData(eventBus);
 const streetData = await loadStreetData(eventBus);
 const durationData = await loadDurationData(eventBus);
-const occupancyData = await loadOccupancyData(eventBus);
+const heatmapData = await loadHeatmapData(eventBus);
 //const historyData = await loadHistoryData(eventBus);
 const avgClusterOccupancyData = await loadAvgClusterOccupancy(eventBus);
+const linegraphData = await loadLinegraphData(eventBus);
 
-initializeFirstScreen();
+//initializeFirstScreen();
 
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
 
-initializeGraph(document.querySelector('#durationhist'), durationData, eventBus);
-initializeHeatmap(document.querySelector('#occupancyheatmap'), occupancyData, eventBus);
+initializeHistogram(document.querySelector('#durationhist'), durationData, eventBus);
+initializeHeatmap(document.querySelector('#occupancyheatmap'), heatmapData, eventBus);
+initializeLineGraph(document.querySelector('#linegraph'), linegraphData, eventBus);
 
 // District Selector
 initializeDistrictSelector(eventBus, avgClusterOccupancyData);

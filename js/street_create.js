@@ -15,7 +15,7 @@ function initializeStreets(map, meterData, streetData, eventBus) {
     },
     onEachFeature: function (feature, layer) {
       if (feature.properties) {
-        /**let popupContent = `
+        let popupContent = `
           <b>Location ID:</b> ${feature.properties.LocationID ?? 'N/A'} <br>
           <b>Street:</b> ${feature.properties.Street ?? 'N/A'} <br>
           <b>Total Revenue:</b> $${feature.properties.TotRev ?? 'N/A'}
@@ -35,7 +35,7 @@ function initializeStreets(map, meterData, streetData, eventBus) {
             mouseout: function (e) {
               meterLayer.resetStyle(e.target);
             }
-        });*/
+        });
       }
     }
   }).addTo(map);
@@ -48,7 +48,7 @@ function initializeStreets(map, meterData, streetData, eventBus) {
         opacity: 0.8
       };
     },
-      /** onEachFeature: function (feature, layer) {
+      onEachFeature: function (feature, layer) {
         let props = feature.properties;
         let utilizationStatus = props["under.utilized"] ? "Under Utilized" : "Optimally Utilized";
 
@@ -59,7 +59,6 @@ function initializeStreets(map, meterData, streetData, eventBus) {
           <b>Max Occupied:</b> ${props.max_occupied ?? 'N/A'} <br>
           <b>Estimated Capacity:</b> ${props["estimated.capacity"]?.toFixed(2) ?? 'N/A'} <br>
           <b>TOC:</b> ${props.toc ?? 'N/A'} <br>
-          <span class="utilization-status">${utilizationStatus}</span>
         `;
 
         layer.bindPopup(popupContent);
@@ -80,7 +79,7 @@ function initializeStreets(map, meterData, streetData, eventBus) {
             map.fitBounds(e.target.getBounds());
           }
         });
-      }*/
+      }
   }).addTo(map);
 
   map.fitBounds(streetLayer.getBounds()); // Adjust map view to the data
