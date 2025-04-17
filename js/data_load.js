@@ -69,6 +69,23 @@ async function loadHeatmapData(eventBus) {
   return occupancyData;
 }
 
+// Load aggregated heatmap data
+async function loadLinegraphData(eventBus) {
+
+  const occupancyData = await readCSV('app_data/linegraph.csv')
+
+  // Convert strings to integers
+  occupancyData.forEach((obj) => {
+    obj.occupancy = parseFloat(obj.ave_occupancy)
+    obj.month = parseInt(obj.month)
+    obj.cluster = parseInt(obj.cluster)
+  });
+
+  //console.log(occupancyData)
+
+  return occupancyData;
+}
+
 // Load mock data with month, year, cluster
 async function loadMockData(eventBus) {
   const data = await readCSV('app_data/mock_data.csv');
@@ -134,6 +151,6 @@ async function readCSV(path) {
   return(formedArr)
 }
 
-export { loadMeterData, loadStreetData, loadDurationData, loadHeatmapData, loadHistoryData, loadAvgClusterOccupancy, loadMockData };
+export { loadMeterData, loadStreetData, loadDurationData, loadHeatmapData, loadHistoryData, loadLinegraphData, loadMockData };
 
 
