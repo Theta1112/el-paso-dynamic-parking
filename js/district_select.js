@@ -1,4 +1,4 @@
-export function initializeDistrictSelector(eventBus, avgClusterOccupancyData) {
+function initializeDistrictSelector(eventBus, avgClusterOccupancyData) {
   eventBus.addEventListener('district-filter-changed', (e) => {
     const selectedCluster = e.detail.cluster;
 
@@ -19,3 +19,5 @@ export function initializeDistrictSelector(eventBus, avgClusterOccupancyData) {
     }
   });
 }
+
+export { initializeDistrictSelect }

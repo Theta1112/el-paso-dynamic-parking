@@ -52,3 +52,8 @@ districtDropdown.addEventListener('change', (e) => {
 // Enable slider button
 //initializeSideSlider(document.querySelector('.time-slider'), eventBus);
 //initializeSideSlider(document.querySelector('.data-slider'), eventBus);
+
+
+initializeDistrictSelect(document.querySelector('.district-select'), eventBus);
+
+initializeStatControl(document.querySelector('#avg-occ'), eventBus);
