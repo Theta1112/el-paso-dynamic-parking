@@ -67,6 +67,19 @@ async function loadOccupancyData(eventBus) {
   return occupancyData;
 }
 
+// Load average occupancy by cluster
+async function loadAvgClusterOccupancy(eventBus) {
+  const clusterData = await readCSV('app_data/avg_occupancy_by_cluster.csv');
+
+  // Convert to appropriate types
+  clusterData.forEach((obj) => {
+    obj.cluster = parseInt(obj.cluster);
+    obj.avg_occupancy = parseFloat(obj.avg_occupancy);
+  });
+
+  return clusterData;
+}
+
 // Helper function to check if an object is empty
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
@@ -102,4 +115,4 @@ async function readCSV(path) {
   return(formedArr)
 }
 
-export { loadMeterData, loadStreetData, loadDurationData, loadOccupancyData, loadHistoryData };
+export { loadMeterData, loadStreetData, loadDurationData, loadOccupancyData, loadHistoryData, loadAvgClusterOccupancy };
