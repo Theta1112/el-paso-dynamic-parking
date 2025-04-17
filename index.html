@@ -20,14 +20,33 @@
       <!-- Removed: Period filter -->
       <div class="filter-group">
         <label>Year</label>
-        <select>
-          <option>2024</option>
-          <option>2025</option>
+        <select id="year-select">
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
         </select>
       </div>
+
+      <div class="filter-group">
+        <label>Month</label>
+        <select id="month-select">
+          <option value="all">All Months</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+      
       <div class="filter-group">
         <label>District</label>
-
         <select id="district-select">
           <option value="all">All Districts</option>
           <option value="1">District 1</option>
@@ -42,9 +61,8 @@
       </div>
       
       <div class="summary-box">—<br><small>Avg. Occupancy</small></div>
-      <div class="summary-box">$100K<br><small>Total Revenue</small></div>
-      <div class="summary-box">5<br><small>Underused Streets</small></div>
-      <div class="summary-box">5<br><small>Underused stuff</small></div>
+      <div class="summary-box">$<br><small>Total Revenue</small></div>
+      <div class="summary-box">—<br><small>Time over Capacity (TOC)</small></div>
 
       <button id="print-report">Print Report</button>
     </div>
