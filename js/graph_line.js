@@ -29,7 +29,7 @@ function renderGraph(graphEl, data) {
     return(e)
   }) 
 
-  console.log(districtData)
+  //console.log(districtData)
 
   // Declare the x (horizontal position) scale.
   const x = d3.scaleUtc(d3.extent(districtData, d => d.timestamp), [margin.left, width - margin.right]);

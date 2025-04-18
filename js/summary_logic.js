@@ -20,10 +20,10 @@ export function initializeSummaryLogic(eventBus, data) {
         filtered = filtered.filter(d => d.year === parseInt(currentFilters.year));
       }
 
-      console.log('Filters:', currentFilters);
-      console.log('Filtered Rows:', filtered.length);
+      //console.log('Filters:', currentFilters);
+      //console.log('Filtered Rows:', filtered.length);
   
-      console.log(filtered)
+      //console.log(filtered)
 
       const avg_occ = d3.mean(filtered, d => d.avg_occupancy) ?? 0;
       const tot_revenue = d3.sum(filtered, d => d.tot_revenue) ?? 0;
@@ -38,7 +38,15 @@ export function initializeSummaryLogic(eventBus, data) {
     }
   
     function handleFilterChange(type, value) {
-      currentFilters[type] = value;
+      if (type !== undefined){
+        currentFilters[type] = value;
+      } 
+    
+      const filterChange = new CustomEvent('filter-change', { detail: currentFilters});
+
+      console.log("EVENT: FILTER CHANGE")
+
+      eventBus.dispatchEvent(filterChange);
       updateSummaryBoxes();
     }
   
@@ -55,6 +63,6 @@ export function initializeSummaryLogic(eventBus, data) {
         handleFilterChange('year', e.target.value);
       });      
   
-    updateSummaryBoxes(); // initial display
+    handleFilterChange(); // initial display
   }
   

@@ -9,7 +9,7 @@ function renderGraph(graphEl, data, eventBus) {
 
   const districtData = data.filter((e) => e.cluster == 1 & e.month == 1) 
 
-  console.log(districtData)
+  //console.log(districtData)
 
   const margin = {top: 10, right: 30, bottom: 10, left: 40}
   const width = 350 - margin.left - margin.right

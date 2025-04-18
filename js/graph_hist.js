@@ -1,10 +1,21 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 function initializeHistogram(graphEl, data, eventBus) {
-  renderGraph(graphEl, data, eventBus);
 
-  eventBus.addEventListener('street-clicked', (e) => {
-    //const filteredData = data.filter((row) => row.street_ID == e.detail.streetID);
+  console.log(data)
+  //renderGraph(graphEl, data, eventBus);
+
+  eventBus.addEventListener('filter-change', (e) => {
+    const filteredData = data.filter((row) => {
+
+      //console.log(e)
+      return(
+        (e.detail.month == "all" || e.detail.month == row.month)
+        & (e.detail.cluster == "all" || e.detail.month == row.cluster)
+      )
+    })
+
+    //console.log(data)
 
     renderGraph(graphEl, filteredData, eventBus);
   })
@@ -141,7 +152,7 @@ function renderGraph(graphEl, rawData, eventBus) {
     eventBus.addEventListener('bar-hover-off', (e) => {
       d3.select(rect).transition()
         .duration('50')
-        .attr('fill', "#69b3a2"); 
+        .attr('fill', "#004080"); 
     })
   })
 
