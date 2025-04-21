@@ -128,7 +128,7 @@ function initializeHistogram(graphEl, fullData, eventBus) {
     // Adjust y domain to updated data
     y.domain([0, d3.max(data, d => d.qty)])
 
-    console.log(d3.max(data, d => d.qty))
+    //console.log(d3.max(data, d => d.qty))
 
     yAxis
       .transition()
@@ -145,12 +145,12 @@ function initializeHistogram(graphEl, fullData, eventBus) {
       .append("rect") // Add a new rect for each new elements
       .merge(rects) // get the already existing elements as well
       .transition()
-      .duration(100)
+      .duration(500)
       .attr("y", function(d) { return y(d.qty); })
       .attr("height", function(d) { return graphBottom - y(d.qty); })
       .delay(function(d,i){
         //console.log(i); 
-        return(250 + i*50)
+        return(150 + i*50)
       })
   }
 

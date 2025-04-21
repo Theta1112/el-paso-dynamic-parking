@@ -44,7 +44,7 @@ function initializeHeatmap(graphEl, data, eventBus) {
 
   // Build color scale
   const myColor = d3.scaleSequential()
-    .interpolator(d3.interpolateRgb("#004080", "#950606"))
+    .interpolator(d3.interpolateRgb("#deebf7", "#08306b"))
     .domain([0,1])
 
   // create a tooltip
@@ -117,7 +117,7 @@ function initializeHeatmap(graphEl, data, eventBus) {
       .attr("ry", 4)
       .attr("width", x.bandwidth() )
       .attr("height", y.bandwidth() )
-      .style("fill", function(d) { return myColor(d.occupancy)} )
+      .style("fill", function(d) { return myColor(d.occupancy ** 4)} )
       .style("stroke-width", 4)
       .style("stroke", "none")
       .style("opacity", 0.8)
@@ -137,7 +137,7 @@ function initializeHeatmap(graphEl, data, eventBus) {
       .merge(rects) // get the already existing elements as well
       .transition()
       .duration(500)
-      .style("fill", function(d) { return myColor(d.occupancy ** 0.5)} )
+      .style("fill", function(d) { return myColor(d.occupancy)} )
       .delay(function(d,i){
         //console.log(i); 
         return(250 + i*50)
