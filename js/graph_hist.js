@@ -108,7 +108,7 @@ function initializeHistogram(graphEl, fullData, eventBus) {
     .attr("x", 8)
     .attr("y", yAxisLabelHeight - 3 )
     .attr("font-size", 12)
-    .text("Vehicles ('000s)");
+    .text("Vehicles");
 
   // percentage text
   svg.append("text")

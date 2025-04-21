@@ -1,15 +1,10 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 function initializeHeatmap(graphEl, data, eventBus) {
-  //console.log(data);
-  renderGraph(graphEl, data, eventBus);
-} 
 
-function renderGraph(graphEl, data, eventBus) {
+  var districtData = data.filter((e) => e.cluster == 0 & e.month == 0) 
 
-  const districtData = data.filter((e) => e.cluster == 1 & e.month == 1) 
-
-  //console.log(districtData)
+  console.log(data)
 
   const margin = {top: 10, right: 30, bottom: 10, left: 40}
   const width = 350 - margin.left - margin.right
@@ -49,7 +44,7 @@ function renderGraph(graphEl, data, eventBus) {
 
   // Build color scale
   const myColor = d3.scaleSequential()
-    .interpolator(d3.interpolateRgb("#004080", "#FF8C00"))
+    .interpolator(d3.interpolateRgb("#004080", "#950606"))
     .domain([0,1])
 
   // create a tooltip
@@ -94,11 +89,11 @@ function renderGraph(graphEl, data, eventBus) {
     //}
 
     tooltip
-        .html(d.dotw_string + " " + d.tod + "<br>" + "Occupancy: " + Math.round(d.occupancy * 100) + "%" )
-        .style("font-size", "10px")
-        .style("left", hover.x + "px")
-        .style("top", hover.y + "px")
-        .style("opacity", 1)
+      .html(d.dotw_string + " " + d.tod + "<br>" + "Occupancy: " + Math.round(d.occupancy * 1000)/10 + "%" )
+      .style("font-size", "10px")
+      .style("left", hover.x + "px")
+      .style("top", hover.y + "px")
+      .style("opacity", 1)
 
     //console.log("x: " + event.x + " y: " + event.y)
 
@@ -131,6 +126,40 @@ function renderGraph(graphEl, data, eventBus) {
     .on("mouseleave", mouseleave);
 
   graphEl.append(svg.node());
+
+  function updateGraph(){
+    var rects = svg.selectAll("rect")
+      .data(districtData) 
+
+    rects
+      .enter()
+      .append("rect") // Add a new rect for each new elements
+      .merge(rects) // get the already existing elements as well
+      .transition()
+      .duration(500)
+      .style("fill", function(d) { return myColor(d.occupancy ** 0.5)} )
+      .delay(function(d,i){
+        //console.log(i); 
+        return(250 + i*50)
+      })
+  }
+
+  eventBus.addEventListener('filter-change', (e) => {
+    
+    const filterMonth = e.detail.month == "all" ? 0 : e.detail.month 
+    const filterCluster = e.detail.cluster == "all" ? 0 : e.detail.cluster 
+
+    //console.log(filterMonth)
+    //console.log(fullData)
+
+    districtData = data.filter((row) => filterMonth == row.month & filterCluster == row.cluster)
+  
+    //console.log(filteredData)
+
+    // Render the graph
+    updateGraph()
+  })
+  
 
 }
 
