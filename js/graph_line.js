@@ -19,7 +19,9 @@ function initializeLineGraph(graphEl, data, eventBus) {
     return(e)
   }) 
 
-  var districtData = data.filter((e) => e.cluster == 1 & e.month == 0)
+  // Initialize
+  var districtData = data.filter((e) => e.cluster == 0 & e.month == 0);
+  var isDark = false;
 
   // Create the SVG container.
   const svg = d3.create("svg")
@@ -27,6 +29,8 @@ function initializeLineGraph(graphEl, data, eventBus) {
     .attr("height", height)
     .attr("viewBox", [0, 0, width, height])
     .attr("style", "max-width: 100%; max-height: 95%; height: auto; height: intrinsic;");
+
+  graphEl.append(svg.node());
 
   // Declare the x (horizontal position) scale.
   const x = d3.scaleUtc()
@@ -43,7 +47,7 @@ function initializeLineGraph(graphEl, data, eventBus) {
   // Add the y-axis, remove the domain line, add grid lines and a label.
   svg.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).ticks(height / 40))
+    .call(d3.axisLeft(y).ticks(height / 25))
     .call(g => g.select(".domain").remove())
     .call(g => g.selectAll(".tick line").clone()
       .attr("x2", width - margin.left - margin.right)
@@ -59,15 +63,61 @@ function initializeLineGraph(graphEl, data, eventBus) {
   // Add the line
   svg.append("path")
     .datum(districtData)
+    .attr("class", "predictive")
     .attr("fill", "none")
     .attr("stroke", "#004080")
     .attr("stroke-width", 2)
     .attr("d", d3.line()
-    .x(d => x(d.timestamp))
-    .y(d => y(d.occupancy))
-  )
+      .x(d => x(d.timestamp))
+      .y(d => y(d.occupancy)))
 
-  graphEl.append(svg.node());
+  function renderHistorical(){
+    var historicalPath = svg.append("path")
+      .datum(districtData)
+      .attr("class", "historical")
+      .attr("fill", "none")
+      .attr("stroke", "#004080")
+      .attr("stroke-width", 2)
+      .attr("d", d3.line()
+        .x(d => x(d.timestamp))
+        .y(d => y(d.occupancy)))
+
+    var totalLength = historicalPath.node().getTotalLength();
+
+    historicalPath
+      .enter()
+      .append("path") // Add a new path for each new elements
+      .merge(historicalPath) // get the already existing elements as well
+      .attr("stroke-dasharray", totalLength + " " + totalLength)
+      .attr("stroke-dashoffset", totalLength)
+      .transition()
+        .duration(500)
+        .attr("stroke-dashoffset", 0)
+  }
+
+  function renderPredictive(){
+    var predictivePath = svg.append("path")
+      .datum(districtData)
+      .attr("class", "predictive")
+      .attr("fill", "none")
+      .attr("stroke", "#7f1d6f")
+      .attr("stroke-width", 2)
+      .attr("d", d3.line()
+        .x(d => x(d.timestamp))
+        .y(d => y(d.occupancy +0.4)))
+
+    var totalLength = predictivePath.node().getTotalLength();
+
+    predictivePath
+      .enter()
+      .append("path") // Add a new path for each new elements
+      .merge(predictivePath) // get the already existing elements as well
+      .attr("stroke-dasharray", totalLength + " " + totalLength)
+      .attr("stroke-dashoffset", totalLength)
+      .transition()
+        .duration(500)
+        .attr("stroke-dashoffset", 0)
+  }
 
   function updateGraph(){
 
@@ -81,26 +131,14 @@ function initializeLineGraph(graphEl, data, eventBus) {
       .duration(400)
       .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0));
 
-    var paths = svg.selectAll("path")
-      .datum(districtData) 
+    svg.selectAll("path").remove()
 
-      paths
-      .enter()
-      .append("path") // Add a new rect for each new elements
-      .merge(paths) // get the already existing elements as well
-      .transition()
-      .duration(500)
-      .attr("fill", "none")
-      .attr("stroke", "#004080")
-      .attr("stroke-width", 2)
-      .attr("d", d3.line()
-        .x(d => x(d.timestamp))
-        .y(d => y(d.occupancy))
-      )
-      .delay(function(d,i){
-        //console.log(i); 
-        return(i*50)
-      })
+    renderHistorical()
+    
+    if (isDark) {
+      renderPredictive()
+    }
+
   }
 
   eventBus.addEventListener('filter-change', (e) => {
@@ -114,10 +152,19 @@ function initializeLineGraph(graphEl, data, eventBus) {
       districtData = data.filter((row) => filterMonth == row.month & filterCluster == row.cluster)
     }
 
-    console.log(districtData)
+    // console.log(districtData)
 
     // Render the graph
     updateGraph()
+  })
+
+  eventBus.addEventListener('mode-change', (e) => {
+    isDark = e.detail.isDark
+    if (isDark){
+      renderPredictive()
+    } else {
+      svg.selectAll(".predictive").remove()
+    }
   })
 }
 

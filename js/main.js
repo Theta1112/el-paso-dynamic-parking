@@ -1,7 +1,7 @@
 // script.js
 import { initializeFirstScreen } from './first_screen.js';
 import { initializeMap } from './map_create.js';
-import { loadDurationData, loadHistoryData, loadMeterData, loadHeatmapData, loadStreetData, loadLinegraphData, loadMockData } from './data_load.js';
+import { loadDurationData, loadMeterData, loadHeatmapData, loadStreetData, loadLinegraphData, loadMockData } from './data_load.js';
 import { initializeStreets } from './street_create.js';
 import { initializeSideSlider } from './slider.js';
 import { initializeHistogram } from './graph_hist.js';
@@ -22,7 +22,6 @@ const meterData = await loadMeterData(eventBus);
 const streetData = await loadStreetData(eventBus);
 const durationData = await loadDurationData(eventBus);
 const heatmapData = await loadHeatmapData(eventBus);
-//const historyData = await loadHistoryData(eventBus);
 const linegraphData = await loadLinegraphData(eventBus);
 const mockData = await loadMockData(eventBus);
 
@@ -31,12 +30,16 @@ const mockData = await loadMockData(eventBus);
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
 
+
 initializeHistogram(document.querySelector('#durationhist'), durationData, eventBus);
 initializeHeatmap(document.querySelector('#occupancyheatmap'), heatmapData, eventBus);
 initializeLineGraph(document.querySelector('#linegraph'), linegraphData, eventBus);
 
 // District Selector
 // initializeDistrictSelector(eventBus, avgClusterOccupancyData);
+
+// Summary Logic
+initializeSummaryLogic(eventBus, mockData);
 
 // Add dropdown listener to trigger the cluster change
 // const districtDropdown = document.querySelector('#district-select');
@@ -54,8 +57,5 @@ initializeLineGraph(document.querySelector('#linegraph'), linegraphData, eventBu
 //initializeSideSlider(document.querySelector('.time-slider'), eventBus);
 //initializeSideSlider(document.querySelector('.data-slider'), eventBus);
 
-// Summary Logic
-initializeSummaryLogic(eventBus, mockData);
-
 // Toggle Mode
-initializeToggleMode(map, lightTile, darkTile);
+initializeToggleMode(map, lightTile, darkTile, eventBus);
