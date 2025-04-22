@@ -31,16 +31,12 @@ const mockData = await loadMockData(eventBus);
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
 
-
 initializeHistogram(document.querySelector('#durationhist'), durationData, eventBus);
 initializeHeatmap(document.querySelector('#occupancyheatmap'), heatmapData, eventBus);
 initializeLineGraph(document.querySelector('#linegraph'), linegraphData, eventBus);
 
 // District Selector
 // initializeDistrictSelector(eventBus, avgClusterOccupancyData);
-
-// Summary Logic
-initializeSummaryLogic(eventBus, mockData);
 
 // Add dropdown listener to trigger the cluster change
 // const districtDropdown = document.querySelector('#district-select');
@@ -57,6 +53,9 @@ initializeSummaryLogic(eventBus, mockData);
 // Enable slider button
 //initializeSideSlider(document.querySelector('.time-slider'), eventBus);
 //initializeSideSlider(document.querySelector('.data-slider'), eventBus);
+
+// Summary Logic
+initializeSummaryLogic(eventBus, mockData);
 
 // Toggle Mode
 initializeToggleMode(map, lightTile, darkTile);

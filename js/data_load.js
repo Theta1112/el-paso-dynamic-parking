@@ -38,6 +38,8 @@ async function loadDurationData(eventBus) {
   durationData.forEach((obj) => {
     obj.bucket = parseInt(obj.bucket)
     obj.qty = parseInt(obj.qty)
+    obj.month = parseInt(obj.month)
+    obj.cluster = parseInt(obj.cluster)
   });
 
   return durationData;
