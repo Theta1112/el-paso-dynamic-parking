@@ -150,7 +150,7 @@ function initializeHistogram(graphEl, fullData, eventBus) {
       .attr("height", function(d) { return graphBottom - y(d.qty); })
       .delay(function(d,i){
         //console.log(i); 
-        return(150 + i*50)
+        return(i*50)
       })
   }
 

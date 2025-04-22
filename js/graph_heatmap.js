@@ -4,10 +4,10 @@ function initializeHeatmap(graphEl, data, eventBus) {
 
   var districtData = data.filter((e) => e.cluster == 0 & e.month == 0) 
 
-  console.log(data)
+  // console.log(data)
 
   const margin = {top: 10, right: 30, bottom: 10, left: 40}
-  const width = 350 - margin.left - margin.right
+  const width = 380 - margin.left - margin.right
   const height = 140;
 
   // append the svg object to the body of the page
