@@ -57,7 +57,7 @@ function initializeLineGraph(graphEl, data, eventBus) {
       .attr("y", 10)
       .attr("fill", "currentColor")
       .attr("text-anchor", "start")
-      .text("Occupied Fraction"));
+      .text("Occupancy Rate"));
 
   // Append a path for the line.
   // Add the line

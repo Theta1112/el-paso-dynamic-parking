@@ -64,16 +64,20 @@ function initializeHeatmap(graphEl, data, eventBus) {
   // Three function that change the tooltip when user hover / move / leave a cell
   const mouseover = function(event,d) {
 
+    const strokeColor = isDark ? "white" : "black"
+
     tooltip
       .style("opacity", 1)
     d3.select(this)
-      .style("stroke", "black")
+      .style("stroke", strokeColor)
       .style("opacity", 1)
   }
 
   const hover = {x: 300, y: 300}
 
   const mousemove = function(event,d) {
+
+    const fillColor = isDark ? "black" : "white"
 
     if (event.x > 410) {
       hover.x = event.x - 100
@@ -95,6 +99,7 @@ function initializeHeatmap(graphEl, data, eventBus) {
       .style("font-size", "10px")
       .style("left", hover.x + "px")
       .style("top", hover.y + "px")
+      .style("background-color", fillColor)
       .style("opacity", 1)
 
     //console.log("x: " + event.x + " y: " + event.y)
