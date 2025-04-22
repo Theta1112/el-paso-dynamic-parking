@@ -24,7 +24,11 @@ function initializeMap(mapElement, eventBus) {
   // Add layer control to the map
   L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
-  return(map);
+  return {
+    map: map,
+    lightTile: lightMap,
+    darkTile: darkMap
+  };
 }
 
 export { initializeMap };

@@ -9,12 +9,13 @@ import { initializeHeatmap } from './graph_heatmap.js';
 import { initializeSummaryLogic } from './summary_logic.js';
 import { initializeDistrictSelector } from './district_select.js';
 import { initializeLineGraph } from './graph_line.js';
+import { initializeToggleMode } from './toggle_mode.js';
 
 // Event bus
 const eventBus = new EventTarget(); 
 
 // Initialize Background Map
-var map = initializeMap(document.querySelector('#map'), eventBus);
+const { map, lightTile, darkTile } = initializeMap(document.querySelector('#map'), eventBus);
 
 // Load data
 const meterData = await loadMeterData(eventBus);
@@ -55,3 +56,6 @@ initializeLineGraph(document.querySelector('#linegraph'), linegraphData, eventBu
 
 // Summary Logic
 initializeSummaryLogic(eventBus, mockData);
+
+// Toggle Mode
+initializeToggleMode(map, lightTile, darkTile);
