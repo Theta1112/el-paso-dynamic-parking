@@ -38,19 +38,12 @@ async function loadDurationData(eventBus) {
   durationData.forEach((obj) => {
     obj.bucket = parseInt(obj.bucket)
     obj.qty = parseInt(obj.qty)
+    obj.prediction = parseInt(obj.prediction)
     obj.month = parseInt(obj.month)
     obj.cluster = parseInt(obj.cluster)
   });
 
   return durationData;
-}
-
-// Load historical data
-async function loadHistoryData(eventBus) {
-
-  const historyData = await readCSV('app_data/jan_data.csv');
-  
-  return historyData;
 }
 
 // Load aggregated heatmap data
@@ -153,6 +146,6 @@ async function readCSV(path) {
   return(formedArr)
 }
 
-export { loadMeterData, loadStreetData, loadDurationData, loadHeatmapData, loadHistoryData, loadLinegraphData, loadMockData };
+export { loadMeterData, loadStreetData, loadDurationData, loadHeatmapData, loadLinegraphData, loadMockData };
 
 

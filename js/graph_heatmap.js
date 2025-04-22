@@ -10,6 +10,13 @@ function initializeHeatmap(graphEl, data, eventBus) {
   const width = 380 - margin.left - margin.right
   const height = 140;
 
+  // Declare initial dark state
+  var isDark = false;
+
+  // Color scheme
+  const histColors = {low: "#deebf7", high: "#08306b"}
+  const predColors = {low: "#bcbddc", high: "#3f007d"}
+
   // append the svg object to the body of the page
   var svg = d3.create("svg")
     .attr("width", width)
@@ -42,11 +49,6 @@ function initializeHeatmap(graphEl, data, eventBus) {
     .call(d3.axisLeft(y).tickSize(0))
     .select(".domain").remove()
 
-  // Build color scale
-  const myColor = d3.scaleSequential()
-    .interpolator(d3.interpolateRgb("#deebf7", "#08306b"))
-    .domain([0,1])
-
   // create a tooltip
   const tooltip = d3.select(graphEl)
     .append("div")
@@ -62,16 +64,20 @@ function initializeHeatmap(graphEl, data, eventBus) {
   // Three function that change the tooltip when user hover / move / leave a cell
   const mouseover = function(event,d) {
 
+    const strokeColor = isDark ? "white" : "black"
+
     tooltip
       .style("opacity", 1)
     d3.select(this)
-      .style("stroke", "black")
+      .style("stroke", strokeColor)
       .style("opacity", 1)
   }
 
   const hover = {x: 300, y: 300}
 
   const mousemove = function(event,d) {
+
+    const fillColor = isDark ? "black" : "white"
 
     if (event.x > 410) {
       hover.x = event.x - 100
@@ -93,6 +99,7 @@ function initializeHeatmap(graphEl, data, eventBus) {
       .style("font-size", "10px")
       .style("left", hover.x + "px")
       .style("top", hover.y + "px")
+      .style("background-color", fillColor)
       .style("opacity", 1)
 
     //console.log("x: " + event.x + " y: " + event.y)
@@ -107,9 +114,14 @@ function initializeHeatmap(graphEl, data, eventBus) {
       .style("opacity", 0.8)
   }
 
+  // Build color scale
+  var myColor = d3.scaleSequential()
+    .interpolator(d3.interpolateRgb("#deebf7", "#08306b"))
+    .domain([0,1])
+
   // add the squares
   svg.selectAll()
-    .data(districtData, function(d) {return d.dotw+':'+d.tod;})
+    .data(districtData, function(d) {return d.dotw +':'+ d.tod;})
     .join("rect")
       .attr("x", function(d) { return x(d.dotw) })
       .attr("y", function(d) { return y(d.tod) })
@@ -128,6 +140,15 @@ function initializeHeatmap(graphEl, data, eventBus) {
   graphEl.append(svg.node());
 
   function updateGraph(){
+
+    const colorScheme = isDark ? predColors : histColors
+    // Build color scale
+    myColor = d3.scaleSequential()
+      .interpolator(d3.interpolateRgb(colorScheme.low, colorScheme.high))
+      .domain([
+        d3.min(districtData.map((d) => d.occupancy)),
+        d3.max(districtData.map((d) => d.occupancy))])
+
     var rects = svg.selectAll("rect")
       .data(districtData) 
 
@@ -136,11 +157,11 @@ function initializeHeatmap(graphEl, data, eventBus) {
       .append("rect") // Add a new rect for each new elements
       .merge(rects) // get the already existing elements as well
       .transition()
-      .duration(500)
+      .duration(300)
       .style("fill", function(d) { return myColor(d.occupancy)} )
       .delay(function(d,i){
         //console.log(i); 
-        return(250 + i*50)
+        return(i*15)
       })
   }
 
@@ -158,6 +179,16 @@ function initializeHeatmap(graphEl, data, eventBus) {
 
     // Render the graph
     updateGraph()
+  })
+
+  eventBus.addEventListener('mode-change', (e) => {
+    
+    // Update dark setting
+    isDark = e.detail.isDark
+
+    // Render graph
+    updateGraph()
+
   })
   
 
