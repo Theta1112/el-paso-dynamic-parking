@@ -25,11 +25,10 @@ const heatmapData = await loadHeatmapData(eventBus);
 const linegraphData = await loadLinegraphData(eventBus);
 const mockData = await loadMockData(eventBus);
 
-//initializeFirstScreen();
+initializeFirstScreen();
 
 // Render street and meter layers
 initializeStreets(map, meterData, streetData, eventBus);
-
 
 initializeHistogram(document.querySelector('#durationhist'), durationData, eventBus);
 initializeHeatmap(document.querySelector('#occupancyheatmap'), heatmapData, eventBus);
