@@ -1,7 +1,7 @@
 // script.js
 import { initializeFirstScreen } from './first_screen.js';
 import { initializeMap } from './map_create.js';
-import { loadDurationData, loadMeterData, loadHeatmapData, loadStreetData, loadLinegraphData, loadMockData } from './data_load.js';
+import { loadDurationData, loadMeterData, loadHeatmapData, loadStreetData, loadLinegraphData, loadMonthlyData } from './data_load.js';
 import { initializeStreets } from './street_create.js';
 import { initializeSideSlider } from './slider.js';
 import { initializeHistogram } from './graph_hist.js';
@@ -23,7 +23,7 @@ const streetData = await loadStreetData(eventBus);
 const durationData = await loadDurationData(eventBus);
 const heatmapData = await loadHeatmapData(eventBus);
 const linegraphData = await loadLinegraphData(eventBus);
-const mockData = await loadMockData(eventBus);
+const monthlyData = await loadMonthlyData(eventBus);
 
 //initializeFirstScreen();
 
@@ -39,7 +39,7 @@ initializeLineGraph(document.querySelector('#linegraph'), linegraphData, eventBu
 // initializeDistrictSelector(eventBus, avgClusterOccupancyData);
 
 // Summary Logic
-initializeSummaryLogic(eventBus, mockData);
+initializeSummaryLogic(eventBus, monthlyData);
 
 // Add dropdown listener to trigger the cluster change
 // const districtDropdown = document.querySelector('#district-select');

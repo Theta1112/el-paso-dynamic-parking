@@ -81,17 +81,20 @@ async function loadLinegraphData(eventBus) {
   return occupancyData;
 }
 
-// Load mock data with month, year, cluster
-async function loadMockData(eventBus) {
-  const data = await readCSV('app_data/mock_data.csv');
+// Load cluster monthly data with month, year, cluster
+async function loadMonthlyData(eventBus) {
+  const data = await readCSV('app_data/cluster_monthly_data.csv');
 
   data.forEach(d => {
     d.cluster = parseInt(d.cluster);
     d.month = parseInt(d.month);
     d.year = parseInt(d.year);
-    d.avg_occupancy = parseFloat(d.avg_occupancy);
-    d.tot_revenue = parseFloat(d.tot_revenue);
+    d.avg_occ = parseFloat(d.avg_occ);
+    d.total_revenue = parseFloat(d.total_revenue);
     d.toc = parseFloat(d.toc);
+    d.predicted_avg_occ = parseFloat(d.predicted_avg_occ);
+    d.predicted_toc = parseFloat(d.predicted_toc);
+    d.predicted_revenue = parseFloat(d.predicted_revenue);
   });
 
   return data;
@@ -146,6 +149,6 @@ async function readCSV(path) {
   return(formedArr)
 }
 
-export { loadMeterData, loadStreetData, loadDurationData, loadHeatmapData, loadLinegraphData, loadMockData };
+export { loadMeterData, loadStreetData, loadDurationData, loadHeatmapData, loadLinegraphData, loadMonthlyData };
 
 
