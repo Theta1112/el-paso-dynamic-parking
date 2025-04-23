@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale = 1.0">
   <title>Parking Meters Map</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -80,6 +81,7 @@
         <div id="linegraph"></div>
       </div>
       <div id="heatmap" class="chart-box">Occupancy Heatmap
+        <i class="fas fa-circle-info heatmap-info-icon" title="Click for more info"></i>
         <div id="occupancyheatmap"></div>
       </div>
       <div id="bar-chart" class="chart-box">Parking Duration Distribution
@@ -95,6 +97,13 @@
         <div>▇ Maintain</div>
         <div>▇ Decrease</div>
       </div>
+    </div>
+  </div>
+
+  <div id="heatmap-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <img src="images/heatmap_info.png" alt="Heatmap Explanation" />
     </div>
   </div>
 

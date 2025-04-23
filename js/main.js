@@ -10,6 +10,7 @@ import { initializeSummaryLogic } from './summary_logic.js';
 import { initializeDistrictSelector } from './district_select.js';
 import { initializeLineGraph } from './graph_line.js';
 import { initializeToggleMode } from './toggle_mode.js';
+import { initializeHeatmapInfo } from './heatmap_info.js';
 
 // Event bus
 const eventBus = new EventTarget(); 
@@ -59,3 +60,6 @@ initializeSummaryLogic(eventBus, monthlyData);
 
 // Toggle Mode
 initializeToggleMode(map, lightTile, darkTile, eventBus);
+
+//Heatmap Info
+initializeHeatmapInfo();
