@@ -6,6 +6,8 @@ export function initializeSummaryLogic(eventBus, data) {
       month: 'all',
       year: '2024' // default
     };
+
+    let predictMode = false;
   
     function updateSummaryBoxes() {
       let filtered = data;
@@ -25,15 +27,20 @@ export function initializeSummaryLogic(eventBus, data) {
   
       //console.log(filtered)
 
-      const avg_occ = d3.mean(filtered, d => d.avg_occupancy) ?? 0;
-      const tot_revenue = d3.sum(filtered, d => d.tot_revenue) ?? 0;
-      const avg_toc = d3.sum(filtered, d => d.toc) ?? 0;
+      // Choose correct fields depending on mode
+      const occField = predictMode ? 'predicted_avg_occ' : 'avg_occ';
+      const revField = predictMode ? 'predicted_revenue' : 'total_revenue';
+      const tocField = predictMode ? 'predicted_toc' : 'toc';
+
+      const avg_occ = d3.mean(filtered, d => d[occField]) ?? 0;
+      const tot_revenue = d3.sum(filtered, d => d[revField]) ?? 0;
+      const toc = d3.sum(filtered, d => d[tocField]) ?? 0;
   
       const summaryBoxes = document.querySelectorAll('.summary-box');
       if (summaryBoxes.length >= 3) {
         summaryBoxes[0].innerHTML = `${(avg_occ * 100).toFixed(1)}%<br><small>Avg. Occupancy</small>`;
         summaryBoxes[1].innerHTML = `${tot_revenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}<br><small>Total Revenue</small>`;
-        summaryBoxes[2].innerHTML = `${(avg_toc * 100).toFixed(1)}%<br><small>Time over Capacity (TOC)</small>`;        
+        summaryBoxes[2].innerHTML = `${(toc * 100).toFixed(1)}%<br><small>Time over Capacity (TOC)</small>`;        
       }
     }
   
@@ -61,7 +68,13 @@ export function initializeSummaryLogic(eventBus, data) {
   
     document.querySelector('#year-select').addEventListener('change', e => {
         handleFilterChange('year', e.target.value);
-      });      
+      });
+    
+    // Listen for mode change from toggle_mode.js
+    eventBus.addEventListener('mode-change', e => {
+      predictMode = e.detail.isDark;
+      updateSummaryBoxes();
+    });
   
     handleFilterChange(); // initial display
   }
