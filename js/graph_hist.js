@@ -2,9 +2,9 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 function initializeHistogram(graphEl, fullData, eventBus) {
 
-  const margin = {top: 10, right: 10, bottom: 25, left: 50}
+  const margin = {top: 10, right: 10, bottom: 15, left: 50}
   const width = 350 - margin.left - margin.right
-  const height = 200;
+  const height = 150;
   const xAxisLabelHeight = 20;
   const yAxisLabelHeight = 20;
 
@@ -243,7 +243,7 @@ function initializeHistogram(graphEl, fullData, eventBus) {
     yAxis
       .transition()
       .duration(400)
-      .call(d3.axisLeft(y).tickSizeOuter(0));
+      .call(d3.axisLeft(y).ticks(4).tickSizeOuter(0));
 
     renderHistorical()
     if (isDark){
