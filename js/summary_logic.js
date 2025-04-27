@@ -34,7 +34,7 @@ export function initializeSummaryLogic(eventBus, data) {
 
       const avg_occ = d3.mean(filtered, d => d[occField]) ?? 0;
       const tot_revenue = d3.sum(filtered, d => d[revField]) ?? 0;
-      const toc = d3.sum(filtered, d => d[tocField]) ?? 0;
+      const toc = d3.mean(filtered, d => d[tocField]) ?? 0;
   
       const summaryBoxes = document.querySelectorAll('.summary-box');
       if (summaryBoxes.length >= 3) {
