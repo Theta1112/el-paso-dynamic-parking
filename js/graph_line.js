@@ -104,7 +104,7 @@ function initializeLineGraph(graphEl, data, eventBus) {
       .attr("stroke-width", 2)
       .attr("d", d3.line()
         .x(d => x(d.timestamp))
-        .y(d => y(d.occupancy +0.4)))
+        .y(d => y(d.predicted)))
 
     var totalLength = predictivePath.node().getTotalLength();
 
