@@ -18,6 +18,8 @@ function initializeHistogram(graphEl, fullData, eventBus) {
   // Declare initial dark state
   var isDark = false;
 
+  //console.log(fullData.map((d) => d.prediction - d.qty))
+
   // Process the data to make it ready for rendering
   function prepareData(raw){
 
@@ -45,10 +47,13 @@ function initializeHistogram(graphEl, fullData, eventBus) {
 
     // To get predictive, substitute qty for prediction
     const rawPredictive = raw.map((d) => {
-        const out = d
+        const out = {...d}
         out.qty = d.prediction
         return(out)
     })
+
+    //console.log(raw)
+    //console.log(rawPredictive)
 
     const historical = getCumulative(raw)
     const predictive = getCumulative(rawPredictive)
@@ -59,6 +64,8 @@ function initializeHistogram(graphEl, fullData, eventBus) {
 
   // Execute data preperation
   var dataContainer = prepareData(fullData);
+
+  //console.log(dataContainer)
 
   // append the svg object to the body of the page
   var svg = d3.create("svg")
@@ -207,8 +214,8 @@ function initializeHistogram(graphEl, fullData, eventBus) {
       .merge(rects) // get the already existing elements as well
       .transition()
       .duration(150)
-      .attr("y", function(d) { return y(d.qty / 2); })
-      .attr("height", function(d) { return (graphBottom - y(d.qty / 2)); })
+      .attr("y", function(d) { return y(d.qty); })
+      .attr("height", function(d) { return (graphBottom - y(d.qty)); })
       .delay(function(d,i){
         //console.log(i); 
         return(i*50)
@@ -238,8 +245,11 @@ function initializeHistogram(graphEl, fullData, eventBus) {
   function updateGraph(){ 
 
     // Adjust y domain to updated data
-    y.domain([0, d3.max(dataContainer.historical.data, d => d.qty)])
-
+    y.domain([0, Math.max(
+      d3.max(dataContainer.historical.data, d => d.qty),
+      d3.max(dataContainer.predictive.data, d => d.qty)
+    )])
+    
     yAxis
       .transition()
       .duration(400)
@@ -292,7 +302,7 @@ function initializeHistogram(graphEl, fullData, eventBus) {
       graphEl.querySelector('.percentage-text').innerHTML = percentage + "%"
       
       if (isDark) {
-        const predictivePercentage = getPercentage(dataContainer.historical.data, dataContainer.historical.percentage)
+        const predictivePercentage = getPercentage(dataContainer.predictive.data, dataContainer.predictive.percentage)
         graphEl.querySelector('.percentage-text-predictive').innerHTML = predictivePercentage + "%"
       }
     })
