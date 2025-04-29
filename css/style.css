@@ -61,6 +61,9 @@ body, html {
   padding: 15px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between; /* NEW: distribute filters + button nicely */
+  height: calc(100vh - 80px); /* 100vh minus header + margins (adjust if needed) */
+  box-sizing: border-box;
   gap: 10px;
 }
 
@@ -93,7 +96,7 @@ body, html {
   margin-top: auto;
   padding: 10px;
   font-weight: bold;
-  background-color: #d9534f;
+  background-color: #004080;
   color: white;
   border: none;
   cursor: pointer;
@@ -138,7 +141,7 @@ body, html {
   left: 10px;
   background-color: white;
   padding: 8px;
-  font-size: 0.9em;
+  font-size: 0.7em;
   border: 1px solid #ccc;
   z-index: 10;
 }
