@@ -1,0 +1,1518 @@
+---
+title: "Dynamically-Priced Parking Management System: Second Draft"
+subtitle: "City of El Paso Planning Division"
+author: "Tutut Indriaty, Sean Koh, Ryan Swett, Macy Trout"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
+---
+
+# Introduction 🎯
+
+Parking management is critical for urban planning, impacting local businesses, traffic, and public satisfaction. The City of El Paso is exploring a **dynamic pricing model** to balance demand and optimize parking resources.
+
+This document outlines the second iteration of our analysis, highlighting key exploratory insights and proposed methodologies.  
+
+**Our Goal:** To demonstrate that parking demand can effectively be managed through strategic pricing adjustments, informed by rigorous data analysis and predictive modeling.
+
+
+# Introduction
+
+Urban parking management is a critical issue that affects traffic congestion, local business performance, and overall quality of life. In response, we propose a **dynamically-priced parking management system** that leverages historical and real-time data to optimize occupancy and balance parking demand across the city.
+
+**Key Goals:**
+- **Balance Demand:** Maintain optimal occupancy (70–80%) in high-demand areas.
+- **Dynamic Pricing:** Adjust parking rates based on time-of-day, day-of-week, and location.
+- **Data-Driven Decisions:** Use predictive analytics to guide pricing strategies and operational decisions.
+
+# Program Overview
+
+Our proposed system aims to transform parking management in El Paso by using a dynamic pricing approach that reflects changing urban demand. By integrating sensor data, parking transactions, and spatial information, our system will facilitate smarter, more flexible pricing models tailored to each district's needs.
+
+## 1. Program Objectives
+
+- **Optimize Occupancy:**  
+  Achieve a balanced occupancy rate to reduce congestion and improve turnover, ensuring parking spaces are available for new drivers while maximizing revenue.
+
+- **Implement Responsive Pricing:**  
+  Automatically adjust parking rates based on real-time demand forecasts. This will incentivize drivers to park during underutilized times and help discourage over-saturation in peak hours.
+
+- **Empower Decision Makers:**  
+  Provide a user-friendly dashboard that presents key metrics and forecasts, enabling program managers to make informed pricing decisions quickly.
+
+## 2. Pilot Study Area: Uptown District (North Stanton Street)
+
+We propose initiating a 6-month pilot in the **Uptown district**, particularly around North Stanton Street, which features:
+
+- **Predominantly F&B Establishments:**  
+  Areas with active food and beverage industries attract variable parking demand.
+  
+- **Existing Paid Evening Parking:**  
+  Despite evening parking being regulated, daytime occupancy remains low.
+  
+- **Opportunity for Demand Shifting:**  
+  The pilot will test whether lowering daytime rates can boost occupancy and whether dynamic adjustments during evenings can better manage congestion.
+
+## 3. Full Program Design
+
+After a successful pilot, we envision scaling the solution citywide with the following structure:
+
+### A. District-Based Pricing
+- **Definition of Districts:**  
+  Divide the city into continuous areas based on similar parking behaviors, which may be determined via clustering analysis.
+  
+- **Customized Rate Plans:**  
+  Each district will have tailored pricing, with adjustments for different times of day and weekend vs. weekday usage.  
+  *Example for Uptown:*  
+  - Morning (8–11 AM): \$1.00/hour (weekday), \$1.50/hour (weekend)  
+  - Midday (12–3 PM): \$1.50/hour (weekday), \$2.00/hour (weekend)  
+  - Afternoon (4–6 PM): \$2.00/hour (weekday), \$2.50/hour (weekend)
+
+### B. Periodic Price Reviews
+- **Adjustment Frequency:**  
+  The Streets and Bridges Department will review and adjust the pricing every 6–12 months based on continuous monitoring and model forecasts.
+  
+- **Model-Driven Recommendations:**  
+  Pricing adjustments will be driven by our predictive model, which uses historical sensor data and transaction records to forecast occupancy levels.
+
+### C. Manager Dashboard
+- **Real-Time Monitoring:**  
+  The dashboard will display key performance indicators (KPIs) such as occupancy rates, transaction volumes, and predicted demand.
+  
+- **Scenario Analysis:**  
+  Managers can simulate the effects of various pricing strategies on occupancy, helping refine adjustments before implementation.
+
+## 4. Scenario Analysis & Contingency Plans
+
+Our model forecasts user behavior in response to price adjustments, and we have identified three potential scenarios:
+
+1. **No Change in Behavior:**  
+   - **Hypothesis:**  
+     Users may be resistant to price increases due to habitual behavior or a lack of viable alternatives.
+   - **Action:**  
+     Implement a larger price differential or consider complementary measures (e.g., enhanced signage or walkability improvements).
+
+2. **Overreaction:**  
+   - **Hypothesis:**  
+     Customers might drastically reduce parking in response to higher prices, leading to underutilization.
+   - **Action:**  
+     Fine-tune the pricing strategy to avoid abrupt changes that drive customers away.
+
+3. **Overflow Parking:**  
+   - **Hypothesis:**  
+     Drivers could bypass paid parking by shifting to nearby residential areas.
+   - **Action:**  
+     Enhance enforcement efforts and explore partnerships with local parking facilities to manage overflow.
+
+## 5. Anticipated Benefits & Implementation Roadmap
+
+### Benefits:
+- **Improved Efficiency:**  
+  Better balance between occupancy and turnover leads to smoother traffic flow and increased revenue.
+- **Economic Boost:**  
+  Optimized pricing attracts more customers during off-peak times, which supports local businesses.
+- **Scalable Model:**  
+  A dynamic, data-driven system that can be scaled citywide and adapted to changing urban conditions.
+
+### Implementation Roadmap:
+
+| **Phase**      | **Description**                                                     | **Timeline**    |
+|----------------|---------------------------------------------------------------------|-----------------|
+| **Pilot**      | Launch 6-month test in Uptown; gather data, deploy initial pricing    | Months 1–6      |
+| **Evaluation** | Assess pilot outcomes and refine model and pricing strategy           | Month 6         |
+| **Scale-Up**   | Expand program citywide with continuous monitoring and periodic updates| Post-Pilot      |
+
+
+
+# 🔧 Data Loading Procedure {.tabset .tabset-fade}
+
+This section includes step-by-step reproducible code for loading and processing the datasets used in the analysis. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE, warning=FALSE}
+
+# Load required libraries
+library(sf)
+library(dplyr)
+library(lubridate)
+library(data.table)
+library(stringr)
+library(tidyverse)
+library(ggplot2)
+library(forcats)
+library(viridis)
+
+# -------------------------------
+# 1. Foot Traffic Data
+# -------------------------------
+
+# foot_traffic_file <- "/Users/macytrout/Desktop/El Paso Parking Data/Mobility Data Cincinnati Area Businesses/Home Locations-DESKTOP-MO52HOV.csv"
+# foot_traffic_df <- read_csv(foot_traffic_file)
+# Check the data
+# head(foot_traffic_df)
+
+# -------------------------------
+# 2. 12-Month Occupancy Data
+# -------------------------------
+occupancy_file <- "data/12_months.csv"
+occupancy_12month_df <- read_csv(occupancy_file)
+occupancy_12month_df_cleaned <- occupancy_12month_df %>%
+  mutate(date = date(occupancy.buckets),
+         hour = hour(ymd_hms(occupancy.buckets, quiet = F)),
+         minute = minute(ymd_hms(occupancy.buckets, quiet = F)),
+         hour = replace_na(hour, 0),
+         minute = replace_na(minute, 0),
+         timestamp = date + hours(hour) + minutes(minute)) %>% 
+  filter(!is.na(street.ID)) %>%
+  filter(wday(timestamp) != 1) %>%
+  filter(street.ID != 24507)
+
+occupancy_12month_df_filtered <- occupancy_12month_df_cleaned %>%
+  filter(hour >= 8 & hour < 18)
+
+COLOUR.VEC <- c('#e41a1c',
+  '#377eb8',
+  '#4daf4a',
+  '#984ea3',
+  '#ff7f00',
+  '#f781bf',
+  '#a65628',
+  '#999999')
+
+# -------------------------------
+# 3. PEM Transactions Data
+# -------------------------------
+pems_file1 <- "data/pems transactions jan-jun2024.csv"
+pems_file2 <- "data/pems transactions jul-dec2024.csv"
+pems_transactions_df <- rbind(
+  fread(pems_file1),
+  fread(pems_file2)
+)
+# Optional: Remove erroneous rows if needed
+pems_transactions_df <- pems_transactions_df %>% filter(row_number() != 839435)
+# Check the data
+head(pems_transactions_df)
+
+
+```
+
+```{r}
+# -------------------------------
+# 4. Streets Data (EPCenterline.geojson)
+# -------------------------------
+streets_geojson_path <- "data/EPCenterline.geojson"
+
+streets_sf <- st_read(streets_geojson_path) %>%
+  rename(street.ID = "OBJECTID_1")  # Replace OBJECTID_1 with actual column name if different
+
+# Check structure
+print(streets_sf)
+
+
+```
+
+
+```{r cluster-functions}
+# Prepares data for clustering operation
+prepare.clustering.data <- function(data, streets_sf) {
+  # Get distinct streets
+  streets <- data %>% 
+    filter(!is.na(street.ID)) %>%
+    distinct(street.ID) %>%
+    arrange(street.ID)
+  
+  # Join to streets.sf to get geom data
+  street.centres <- streets_sf %>% 
+    right_join(streets) %>%
+    st_centroid() %>%
+    st_coordinates()
+  
+  # Join street centres back
+  streets$lon = street.centres[,1]
+  streets$lat = street.centres[,2]
+  
+  streets <- streets %>%
+    mutate(lon = (lon - mean(lon)) / sd(lon),
+           lat = (lat - mean(lat)) / sd(lat))
+  
+  for (dotw.iter in min(wday(data$timestamp)):max(wday(data$timestamp))) {
+    for(hour.iter in min(data$hour):max(data$hour)) {
+      streets[[paste0('dotw_',dotw.iter, '_hr_', hour.iter)]] <- data %>%
+        filter(hour == hour.iter & wday(timestamp) == dotw.iter) %>%
+        group_by(street.ID) %>%
+        summarise(value = mean(occupied_fraction_99)) %>%
+        arrange(street.ID) %>%
+        pull(value)
+    }
+  }
+
+  
+  return(streets)
+}
+
+
+# Normalize and scale coordinates. Then perform k means.
+# geographic inflation factor (gif): represents how much importance geography is to clustering 
+kmeans_streets <- function(clustering.data, k, gif = 1, streets.sf = NA, seed = NA) {
+  
+  if (is.numeric(seed)) {
+    set.seed(seed)
+  }
+  
+  clustering.data <- clustering.data %>%
+    mutate(lon = gif * lon,
+           lat = gif * lat)
+  
+  # Perform k means and assign clusters
+  clustering.data$cluster <- factor(kmeans(clustering.data %>% select(-street.ID), k)$cluster)
+  
+  p <- NA
+  
+  if (!is.null(dim(streets_sf))) {
+    clustering.data.sf <- streets_sf %>% 
+      right_join(clustering.data)
+    
+    p <- ggplot() + 
+      geom_sf(data = clustering.data.sf, aes(color = cluster)) + 
+      scale_color_manual(values = COLOUR.VEC) +
+      theme_void()
+    
+    print(p)
+  }
+  
+  
+  return(clustering.data)
+}
+
+```
+
+
+
+```{r}
+
+
+# -------------------------------
+# 5. Meters Data (meters.geojson)
+# -------------------------------
+meters_geojson_path <- "data/meters.geojson"
+meters_sf <- st_read(meters_geojson_path)
+# Check the data
+print(meters_sf)
+
+```
+
+
+```{r}
+
+# 1. Convert datetime and extract date/time columns
+transactions_date_df <- pems_transactions_df %>%
+  mutate(
+    # Convert 'datetime' column to a proper datetime object
+    datetime_parsed = mdy_hm(datetime),
+    # Separate date and time
+    date_only = format(datetime_parsed, "%m/%d/%Y"),
+    time_only = format(datetime_parsed, "%H:%M")
+  )
+
+# 2. Calculate average minutes paid per weekday (excluding Sunday)
+avg_min_per_dayweek <- pems_transactions_df %>%
+  group_by(dayweek) %>%
+  summarise(
+    total_min = sum(min_paid, na.rm = TRUE),
+    unique_days = n_distinct(date)
+  ) %>%
+  mutate(
+    # Round average minutes per unique day
+    avg_min_per_day = round(total_min / unique_days),
+    # Factor dayweek in a logical order
+    dayweek = factor(dayweek, levels = c(
+      "Monday", "Tuesday", "Wednesday", "Thursday",
+      "Friday", "Saturday", "Sunday"
+    ))
+  ) %>%
+  arrange(dayweek) %>%
+  # Optional: Exclude Sunday if desired
+  filter(dayweek != "Sunday") %>%
+  # Add a day category (Weekday vs. Weekend)
+  mutate(day_category = case_when(
+    dayweek %in% c("Monday", "Tuesday", "Wednesday", "Thursday") ~ "Weekday",
+    dayweek %in% c("Friday", "Saturday") ~ "Weekend"
+  ))
+
+# Check the final data frames
+head(transactions_date_df)
+head(avg_min_per_dayweek)
+```
+
+
+# 📊 Exploratory Data Analysis (EDA)
+
+In this section, we explore the data to identify patterns in parking behavior.
+
+
+
+```{r, warning=FALSE}
+
+foot_traffic_df_clean <- foot_traffic_df %>%
+  # Keep only rows that have non-missing date, time, and day-of-week
+  filter(!is.na(Date), !is.na(Time), !is.na(`Day of Week`)) %>%
+  mutate(
+    # Combine Date + Time into a single datetime (adjust time zone if needed)
+    DateTime = mdy_hms(paste(Date, Time), tz = "America/Denver", quiet = TRUE),
+    # Extract the hour from DateTime
+    Hour = hour(DateTime)
+  ) %>%
+  # Remove rows where hour didn't parse properly
+  filter(!is.na(Hour))
+
+# Optional: Check how many rows are left
+nrow(foot_traffic_df_clean)
+
+
+# Plot the hourly distribution (histogram plus density overlay)
+ggplot(foot_traffic_df_clean, aes(x = Hour)) +
+  geom_histogram(binwidth = 1, fill = "#457B9D", color = "white", alpha = 0.85) +
+  geom_density(aes(y = ..count..), color = "#E63946", linewidth = 1.2, alpha = 0.8) +
+  labs(
+    title = "Hourly Foot Traffic",
+    x = "Hour of the Day",
+    y = "Number of Visitors"
+  ) +
+  theme_minimal(base_size = 14) +
+  scale_x_continuous(breaks = seq(0, 23, by = 2))
+```
+
+**Figure 1: Hourly Foot Traffic**
+
+*Imagine this:*
+In the quiet early hours of the day, you notice only a trickle of people stepping out. As the morning unfolds, foot traffic starts picking up—each hour bringing more movement until the streets come alive at midday. This first plot captures that rhythm, showing the number of visitors across each hour. The tall bars and the smooth, red density curve together tell a story: there are quiet moments early on, a bustling peak around midday, and then a gradual slowdown as the day winds down.
+
+*What does this mean for our project?*
+Understanding this hourly flow is essential. When we see these natural peaks and valleys, we know exactly when parking is likely to be in high demand and when it might sit idle. This insight lays the groundwork for dynamically adjusting parking prices—raising rates during the busy hours and lowering them during quieter times—to better manage demand.
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+# Clean the foot traffic data using Date, Time, and Day of Week from the CSV
+foot_traffic_df_clean <- foot_traffic_df %>%
+  filter(!is.na(`Day of Week`), !is.na(Time)) %>% 
+  mutate(
+    # Trim any extra spaces in the Day of Week column
+    Day_of_Week_clean = str_trim(`Day of Week`),
+    # Create a new variable Day_Type based on custom grouping:
+    # Weekend: Thu, Fri, Sat; Weekday: Sun, Mon, Tue, Wed
+    Day_Type = if_else(Day_of_Week_clean %in% c("Fri", "Sat", "Sun"), "Weekend", "Weekday"),
+    # Extract Hour from Time assuming the Time format is "HH:MM" or "HH:MM:SS"
+    Hour = as.numeric(substr(Time, 1, 2))
+  ) %>%
+  filter(!is.na(Hour))
+
+# Verify the new grouping variable
+print(unique(foot_traffic_df_clean$Day_Type))
+print(unique(foot_traffic_df_clean$Day_of_Week_clean))
+
+# Plot hourly foot traffic, faceted by Day_Type (Weekend vs. Weekday)
+ggplot(foot_traffic_df_clean, aes(x = Hour)) +
+  geom_histogram(binwidth = 1, fill = "#457B9D", color = "white", alpha = 0.85) +
+  geom_density(aes(y = ..count..), color = "#E63946", linewidth = 1.2, alpha = 0.8) +
+  facet_wrap(~ Day_Type) +
+  labs(
+    title = "Hourly Foot Traffic by Weekday vs. Weekend",
+    subtitle = "Custom grouping: Weekend (Fri-Sun); Weekday (Mon-Thurs)",
+    x = "Hour of the Day",
+    y = "Number of Visitors",
+    caption = "Source: Mobility Data"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557"),
+    plot.subtitle = element_text(size = 14, color = "#457B9D"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    strip.text = element_text(size = 14, face = "bold"),
+    panel.grid.major = element_line(color = "grey80", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "#F8F9FA", color = NA)
+  ) +
+  scale_x_continuous(breaks = seq(0, 23, by = 2))
+
+```
+
+**Figure 2: Foot Traffic by Hour and Day Type (Weekday vs. Weekend)**
+
+*Imagine this scenario:*
+Picture two very different days in El Paso. On what we call weekdays, the hustle reflects the steady march of everyday work life: people leave home, visit their workplaces or shops, and then return—a calm, predictable pattern. Now, shift your gaze to weekends: the streets transform into a lively stage with bursts of energy—perhaps a surge during the late afternoon leading into a vibrant evening scene.
+
+In our second plot, we tell this part of the story by splitting the data into two chapters: one for weekdays (Sunday through Wednesday) and one for weekends (Thursday through Saturday). Here, the color-coded tiles reveal how foot traffic ebbs and flows across the hours, with each panel painting a different picture. For instance, the weekend might show a peak in traffic later in the day compared to the steady, early-day peaks of weekdays.
+
+*How does this inform our strategy?*
+These insights are crucial for our dynamic parking program. With a clear understanding of these distinct patterns, we can tailor pricing to match the unique rhythm of weekdays versus weekends—ensuring that our pricing strategy not only manages demand effectively but also supports local business and commuter needs in a balanced way.
+
+
+## Parking Duration Analysis (Ryan)
+
+```{r EDA}
+# Parking Duration Histogram
+ggplot(pems_transactions_df %>% filter(min_paid > 0), aes(x = min_paid)) +
+  geom_histogram(binwidth = 15, fill = "#2c7fb8", color = 'white') +
+  scale_x_continuous(
+    breaks = seq(0, max(pems_transactions_df$min_paid), by = 60)
+  ) +
+    scale_y_continuous(labels = comma) +
+  labs(
+    title = "Parking Duration at Metered Spaces",
+    subtitle = "El Paso, TX (2024)",
+    x = "Minutes Paid",
+    y = "Number of Transactions"
+  ) +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", color = "#3c3c3c", family = "Georgia", hjust = 0.5),
+    plot.subtitle = element_text(size = 14, face = "italic", color = "#666666", family = "Georgia", hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold", color = "#333333"),
+    axis.title.y = element_text(size = 12, face = "bold", color = "#333333")
+  )
+```
+
+
+```{r}
+# Parking Duration Histogram with outliers removed
+
+# Remove outliers
+valid <- pems_transactions_df %>% filter(min_paid > 0)
+Q1 <- quantile(valid$min_paid, 0.25)
+Q3 <- quantile(valid$min_paid, 0.75)
+IQR <- Q3 - Q1
+
+filtered_df <- valid %>% 
+  filter(min_paid >= (Q1 - 1.5 * IQR), min_paid <= (Q3 + 1.5 * IQR))
+
+# Create histogram of filtered data
+ggplot(filtered_df, aes(x = min_paid)) +
+  geom_histogram(binwidth = 15, fill = "#2c7fb8", color = "white") +
+  scale_x_continuous(
+    breaks = seq(0, max(filtered_df$min_paid), by = 15)  
+  ) +
+    scale_y_continuous(labels = comma) +  
+  labs(
+    title = "Parking Duration at Metered Spaces",
+    subtitle = "El Paso, TX (2024)",
+    x = "Minutes Paid",
+    y = "Number of Transactions"
+  ) +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", color = "#3c3c3c", family = "Georgia", hjust = 0.5),
+    plot.subtitle = element_text(size = 14, face = "italic", color = "#666666", family = "Georgia", hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold", color = "#333333"),
+    axis.title.y = element_text(size = 12, face = "bold", color = "#333333"))
+```
+
+
+
+
+## Clustering Districts by Parking Behavior (Sean)
+
+We identify groups of streets with similar parking patterns.
+
+
+
+## Occupancy Heatmap: Weekday & Time of Day (Ryan)
+
+Visualizing how occupancy changes across weekdays and different times of day.
+
+```{r}
+# Heat Maps Data Prep
+
+# Clean data
+foot_traffic_df <- foot_traffic_df %>%
+  mutate(
+    Date = mdy(Date), 
+    Time = hms(Time),
+    Hour = hour(Time)
+  )
+foot_traffic_df <- foot_traffic_df %>%
+  drop_na(`Polygon Name`, `Hashed Ubermedia Id`, `Hour`)
+foot_traffic_df <- foot_traffic_df %>%
+  group_by(`Polygon Name`) %>%
+  mutate(Device_Count = n_distinct(`Hashed Ubermedia Id`)) %>%
+  ungroup()
+foot_traffic_clean <- foot_traffic_df %>%
+  drop_na(`Common Evening Long`, `Common Evening Lat`)
+foot_traffic_clean <- foot_traffic_clean %>%
+  filter(`Common Evening Long` > -107, `Common Evening Long` < -106,
+         `Common Evening Lat` > 31.4, `Common Evening Lat` < 32)
+foot_traffic_sf <- st_as_sf(foot_traffic_clean, coords = c("Common Evening Long", "Common Evening Lat"), crs = 4326, remove = FALSE)
+st_bbox(foot_traffic_sf)
+
+# Create data frames for day of the week
+mon_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Mon")
+tue_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Tue")
+wed_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Wed")
+thu_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Thu")
+fri_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Fri")
+sat_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Sat")
+
+# Create data frames for time of day
+filtered_foot_traffic_sf <- foot_traffic_sf %>%
+  mutate(
+    Hour = as.integer(str_extract(Time, "^\\d+(?=H)"))
+  )
+filtered_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 8, Hour <= 18)
+
+morn_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 8 & Hour <= 11)
+midd_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 12 & Hour <= 15)
+after_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 16 & Hour <= 18)
+```
+
+
+```{r}
+# Heat map plots for day of the week
+
+# Monday
+mon <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(mon_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Monday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Tuesday
+tue <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(tue_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Tuesday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Wednesday
+wed <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(wed_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Wednesday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(), 
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),  
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Thursday
+thu <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(thu_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Thursday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(), 
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Friday
+fri <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(fri_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Friday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") + 
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Saturday
+sat <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(sat_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Saturday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+dayweek_combined_plot <- (mon | tue | wed) /
+                 (thu | fri | sat) +
+  plot_annotation(
+    title = "Foot Traffic by Day of the Week", 
+    subtitle = "El Paso, TX (2019-2022)"
+  )
+
+dayweek_combined_plot
+```
+
+
+
+```{r}
+# Heat map plots by time of day
+
+# Morning
+morn <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(morn_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Morning",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Midday
+midd <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(midd_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Midday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Afternoon
+after <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(after_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Afternoon",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+timday_combined_plot <- (morn | midd | after) + 
+  plot_annotation(
+    title = "Foot Traffic by Time of Day", 
+    subtitle = "El Paso, TX (2019-2022)"
+  )
+
+timday_combined_plot
+```
+
+
+
+
+
+# 📖 Literature Review & Research (Tutut)
+
+This section synthesizes key findings from existing research in dynamic pricing and parking economics.
+
+**Performance-Driven Pricing Practices**
+
+(Insert brief synthesis from literature review, citing Donald Shoup and other relevant authors.)
+
+**Behavioral Economics of Parking**
+
+(Briefly discuss elasticity, driver behavior, and implications for pricing strategies.)
+
+**Insights for El Paso**
+
+(Highlight literature insights directly relevant to our use-case.)
+
+
+---
+
+
+# Modeling 
+
+
+```{r, cluster patterns}
+
+plot.cluster.patterns <- function(data.clustered, input.dotw) {
+  
+  cluster.grouped <- data.clustered %>% 
+    mutate(dotw = wday(timestamp)) %>%
+    group_by(hour, street.ID, dotw, cluster)
+  
+  plot.day <- case_when(
+    input.dotw == 1 ~ "Sunday",
+    input.dotw == 2 ~ "Monday",
+    input.dotw == 3 ~ "Tuesday",
+    input.dotw == 4 ~ "Wednesday",
+    input.dotw == 5 ~ "Thursday",
+    input.dotw == 6 ~ "Friday",
+    input.dotw == 7 ~ "Saturday",
+    T ~ "Unknown")
+  
+  p <- ggplot(data = cluster.grouped %>%
+                filter(dotw == input.dotw) %>%
+                summarise(occupied_fraction = mean(occupied_fraction_95))) +
+    geom_line(aes(x = hour, 
+                  y = occupied_fraction, 
+                  group = street.ID, 
+                  color = cluster)) +
+    scale_color_manual(values = COLOUR.VEC) + 
+    geom_line(data = cluster.grouped %>%
+                group_by(hour, dotw, cluster) %>%
+                filter(dotw == input.dotw) %>%
+                summarise(occupied_fraction = mean(occupied_fraction_95)),
+              aes(x = hour, y = occupied_fraction), color = "black", size = 1.8) + 
+    guides(color="none") +
+    geom_vline(xintercept = 18, linetype="dashed") + 
+    facet_wrap(~cluster, nrow = 2) + 
+    ylim(0,1) + 
+    labs(y = "Average Street Occupancy", 
+         title = paste("Average Street Occupancy Patterns on", plot.day))
+  
+  print(p)
+}
+
+
+# Prepare data for clustering
+clustering.data <- prepare.clustering.data(occupancy_12month_df_filtered,
+                                           streets_sf)
+
+clustered <- kmeans_streets(clustering.data, 6, gif = 3.7, seed=521)
+# adjust with those numbers the clustering.data and GIF to get a better
+
+clustering_sf <- streets_sf %>% 
+      right_join(clustered)
+
+
+ggplot() + 
+  geom_sf(data = clustering_sf, aes(color = cluster), linewidth = 1) + 
+  scale_color_manual(values = COLOUR.VEC) +
+  theme_void()
+
+
+# clustering_sf$color <- 
+
+# st_write(clustering_sf, "data/clustered.geojson")
+
+
+    
+```
+
+```{r cluster-patterns-weekday}
+# Join cluster information back onto data
+data.clustered <- occupancy_12month_df_cleaned %>% 
+  filter(!is.na(street.ID)) %>%
+  left_join(clustered %>% dplyr::select(street.ID, cluster))
+
+# Plot out the occupancy pattern over a particular day across clusters
+plot.cluster.patterns(data.clustered, 4)
+# five is thursday 
+
+```
+
+
+
+```{r cluster-patterns-weekend}
+# Plot out the occupancy pattern over a particular day across clusters
+plot.cluster.patterns(data.clustered, 7)
+# 7 is saturday
+```
+
+
+```{r metric-test}
+
+# Compute some metrics at a street level
+metrics <- data.clustered %>%
+  filter(hour >= 8 & hour < 18 & wday(timestamp) != 1) %>%
+  group_by(street.ID, cluster) %>%
+  summarise(bucket = n(),
+            total_toc = sum(occupied_fraction_95 > 0.8),
+            total_twc = sum(occupied_fraction_95 < 0.8 & 
+                              occupied_fraction_95 > 0.3),
+            toc = round(total_toc / bucket,2),
+            twc = round(total_twc / bucket,2),
+            ave_occupancy = round(mean(occupied_fraction_95),2)) %>%
+  dplyr::select(-bucket, -total_toc, -total_twc)
+
+function_line <- function(custom_fun, xmin = 0, xmax = 1, color = "black"){
+  x.data <- seq(xmin, xmax, length.out = 100)
+  out <- data.frame(x = x.data,
+                    y = custom_fun(x.data))
+  return(
+    geom_line(data = out, aes(x = x, y = y), color = color)
+  )
+}
+
+# Relationship between average occupancy and toc
+ggplot(data = metrics) + 
+  geom_point(aes(x = ave_occupancy, y = toc)) +
+  function_line(function(x) x^1.9)
+
+
+t <- occupancy_12month_df %>%
+  group_by(street.ID) %>%
+  summarise(per_95 = mean(per_95))
+
+ggplot(data = t) + 
+  geom_histogram(aes(x = per_95),
+                 binwidth = 2,
+                 color = "black",
+                 fill = "white")
+```
+
+
+```{r decision-metrics}
+
+# Experimentation with time within capacity and time over capacity
+cluster.metrics <- data.clustered %>%
+  filter(hour >= 9 & hour <17 & wday(timestamp) != 1) %>%
+  group_by(cluster) %>%
+  summarise(bucket = n(),
+            total_toc = sum(occupied_fraction_95 > 0.7),
+            total_twc = sum(occupied_fraction_95 < 0.7 & 
+                              occupied_fraction_95 > 0.3),
+            toc = round(total_toc / bucket,2),
+            twc = round(total_twc / bucket,2),
+            ave_occupancy = round(mean(occupied_fraction_95),2)) %>%
+  dplyr::select(-bucket, -total_toc, -total_twc)
+
+
+cluster.metrics
+```
+```{r street-occupancy}
+
+streetwise <- data.clustered %>%
+  filter(hour >= 8 & hour <= 18) %>%
+  group_by(street.ID) %>%
+  summarise(bucket = n(),
+         ave_occ = mean(occupied_fraction_95),
+         throughput = sum(occupied),
+         capacity = mean(per_95))
+
+mean(streetwise$ave_occ < 0.25)
+
+top10 <- streetwise %>%
+  arrange(desc(throughput)) %>%
+  top_n(10, wt = throughput)
+
+top_throuoghput <- streetwise %>%
+  mutate(is_top = street.ID %in% top10$street.ID) %>%
+  group_by(is_top) %>%
+  summarise(total_throughput = sum(throughput))
+
+top_throuoghput %>% 
+  filter(is_top) %>% 
+  dplyr::select(total_throughput) %>%
+  pull() / (5282378 + 1378516)
+
+
+
+
+```
+
+
+
+```{r model-cluster, warning=FALSE}
+library(lubridate)
+library(dplyr)
+
+model_data <- data.clustered %>%
+  mutate(
+    hour = hour(timestamp),  # ← THIS was missing
+    dotw = factor(
+      wday(timestamp), 
+      levels = 1:7,
+      labels = c("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
+    ),
+    time_of_day = case_when(
+      hour >= 8  & hour <= 11 ~ "Morning",
+      hour >= 12 & hour <= 15 ~ "Midday",
+      hour >= 16 & hour <= 18 ~ "Afternoon",
+      TRUE                    ~ NA_character_
+    ) %>% factor(levels = c("Morning","Midday","Afternoon"))
+  ) %>%
+  filter(!is.na(time_of_day))
+
+```
+
+
+
+
+```{r}
+
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(broom)
+
+# 1. Nest your data by cluster
+models_by_cluster <- model_data %>%
+  group_by(cluster) %>%
+  nest()
+
+# 2. Fit one lm per cluster (only dotw × time_of_day inside each cluster)
+models_by_cluster <- models_by_cluster %>%
+  mutate(
+    fit    = map(data, ~ lm(occupied_fraction_95 ~ dotw * factor(hour), data = .x)),
+    glance = map(fit, glance),   # model‐level summaries
+    tidy   = map(fit, tidy)      # coefficient tables
+  )
+
+# 3. Take a peek at cluster “3”’s coefficients:
+models_by_cluster %>%
+  filter(cluster == 3) %>%
+  pull(tidy) %>%
+  .[[1]]
+
+# 4. Or build a combined table of all coefficients:
+all_coefs <- models_by_cluster %>%
+  select(cluster, tidy) %>%
+  unnest(tidy)
+
+print(all_coefs)
+```
+
+
+```{r}
+
+models_by_cluster <- model_data %>%
+  group_by(cluster) %>%
+  nest() %>%
+  mutate(
+    fit    = map(data, ~ lm(occupied_fraction_95 ~ dotw * time_of_day, data = .x)),
+    glance = map(fit, glance),
+    tidy   = map(fit, tidy)
+  )
+
+```
+
+
+```{r}
+# Coefficient summaries (like lm summary()$coefficients) for all clusters:
+all_coefs <- models_by_cluster %>%
+  select(cluster, tidy) %>%
+  unnest(tidy)
+
+# Print or view
+print(all_coefs)
+
+# Model-level summaries (R², AIC, etc.)
+all_glance <- models_by_cluster %>%
+  select(cluster, glance) %>%
+  unnest(glance)
+
+print(all_glance)
+
+```
+
+```{r model-testing}
+
+t2 <- data.clustered %>%
+  filter(cluster == 1) %>%
+  filter(hour >= 8  | hour < 3) %>%
+  mutate(dotw = factor(wday(timestamp)))
+
+m1 <- lm(occupied_fraction_95 ~ factor(hour) * dotw + per_95, data = t2)
+
+colnames(model_data)
+
+summary(m1)
+
+t2$predict <- predict(m1, t2)
+
+t2.mean.sf <- t2 %>% 
+  group_by(street.ID) %>%
+  summarise(occupied_fraction_95 = (occupied_fraction_95)) %>%
+  left_join(streets_sf %>% dplyr::select(street.ID)) %>%
+  st_as_sf()
+
+ggplot(data = t2.mean.sf) +
+  geom_sf(aes(color = occupied_fraction_95))
+
+
+plot.cluster.patterns()  
+```
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(purrr)
+
+# helper: align factor levels before predicting
+predict_cluster <- function(fit, newdata) {
+  for (v in names(fit$xlevels)) {
+    if (v %in% names(newdata)) {
+      newdata[[v]] <- factor(newdata[[v]], levels = fit$xlevels[[v]])
+    }
+  }
+  predict(fit, newdata = newdata)
+}
+
+# 1) Build the 18-row grid per cluster
+grid_18x <- expand_grid(
+  cluster     = unique(model_data$cluster),
+  dotw        = levels(model_data$dotw),
+  time_of_day = levels(model_data$time_of_day)
+) %>%
+  mutate(
+    dotw        = factor(dotw,        levels = levels(model_data$dotw)),
+    time_of_day = factor(time_of_day, levels = levels(model_data$time_of_day))
+  )
+
+# 2) Nest that grid by cluster
+grid_nest <- grid_18x %>%
+  group_by(cluster) %>%
+  nest(newdata = c(dotw, time_of_day))
+
+# 3) Join fits, predict (list-column), then unnest
+predictions <- models_by_cluster %>%
+  select(cluster, fit) %>%
+  left_join(grid_nest, by = "cluster") %>%
+  mutate(
+    preds = map2(fit, newdata, predict_cluster)   # list-column of length-18 numeric vectors
+  ) %>%
+  select(cluster, newdata, preds) %>%
+  unnest(c(newdata, preds)) %>%
+  rename(predicted_occupancy = preds)
+
+# 4. Done! Preview:
+print(predictions)
+
+```
+
+
+```{r, export}
+
+library(readr)    
+library(jsonlite)   
+
+# — after predictions pipeline —
+# predictions <- … (as we built above)
+
+# 1. write CSV
+write_csv(predictions, "~/Desktop/predicted_occupancy_by_cluster.csv")
+
+# 2. write JSON
+
+write_json(
+  predictions,
+  path       = "~/Desktop/predicted_occupancy_by_cluster.json",
+  dataframe  = "rows",
+  pretty     = TRUE,
+  auto_unbox = TRUE
+)
+
+```
+
+
+scratch price recs in final dataset and no decrease increase, just predicted occupancy
+
+
+
+run model for all 6 districts 
+
+should have 18 predictions per cluster
+
+
+for each row of the 12 months, he needs one prediction, 
+
+one prediction for cluster, for time of day, day of the week, 
+
+send to sean on whatsapp for first 
+
+second on box 
+
+
+
+
+things to add for context 
+# description for how we made the 12 month dataset 
+
+- every meter was matched to nearest street, then every parking transaction, 1 row is time from parking from say 10 to whenever to the meter, so then we say it was occupied from 10-10;30 and so on, then if he leaves someone else comes in then the two would be added together in time occupied so there is a number higher than true occupancy of the street. becaauyse if we used 100 as total occupancy, thats prob an over estimate of occupancy 
+
+1. we did a restriction that no more than 2 cars can be parked somewhere at any time, only 2 at once 
+
+2. second restriction is instead of looking at total histotical max, we look at 99 and 95 percentile so 95 of all occupnact ever seen on street 
+
+we divide by that for the estimate to see true occupancy of street, 95 is an unesterimation of tryue occupancy of street. 99 and 100 are probably over estimates, probably somewhere between there
+
+point is were giving with the eda is actually the occupancy in most of el paso is really low, even when using total of 95, were still seeing under 50% occupancy 
+
+time over capacity is also low, very little time 
+
+even when all numbers are in favor of too much parking, el paso still shows too much parking
+
+2 narratives, we should charge more for parking, but we have too much parking??? so it doesnt make sense but were gonna make it work.
+
+
+
+- talk about the curve of time over capacity and how revolutionary is that 
+
+- really cite MICHAELs paper that he cited for our project 
+
+
+
+POTENTIAL RECS
+
+Eric Guerra talks about repurposing land thats used for streets, this is an idea for the proposed plan for SEVERLY underutilized
+
+remove parking and make it something else
+
+could make the parking prohibitibly expensive
+
+
+
+
+
+# Appendix Visualizations
+
+
+```{r}
+
+# Clean and process foot traffic data
+foot_traffic_clean <- foot_traffic %>%
+  mutate(
+    # Convert Date and Time to proper objects
+    Date = mdy(Date),
+    Time = hms(Time),
+    Hour = hour(Time)
+  ) %>%
+  drop_na(`Polygon Name`, `Hashed Ubermedia Id`, Hour) %>%
+  group_by(`Polygon Name`) %>%
+  mutate(Device_Count = n_distinct(`Hashed Ubermedia Id`)) %>%
+  ungroup()
+  
+# Verify cleaned data
+head(foot_traffic_clean)
+
+# Summarize average foot traffic by each location type
+foot_traffic_summary <- foot_traffic_clean %>%
+  count(`Polygon Name`, name = "Device_Count")
+
+# Plot a horizontal bar chart sorted by device count
+foot_traffic_summary %>%
+  mutate(`Polygon Name` = fct_reorder(`Polygon Name`, Device_Count)) %>%
+  ggplot(aes(x = `Polygon Name`, y = Device_Count, fill = Device_Count)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  labs(
+    title = "Average Foot Traffic by Location Type",
+    subtitle = "Sorted by the Number of Unique Devices",
+    x = "Location Type",
+    y = "Number of Unique Devices",
+    caption = "Source: Mobility Data"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557"),
+    plot.subtitle = element_text(size = 14, color = "#457B9D"),
+    axis.title.x = element_text(face = "bold", size = 14),
+    axis.title.y = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 10),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "grey80", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "#F8F9FA", color = NA)
+  )
+
+# Create a tile plot to show how foot traffic (device count) varies by hour and location
+ggplot(foot_traffic_clean, aes(x = Hour, y = `Polygon Name`, fill = Device_Count)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma", direction = -1) +
+  labs(
+    title = "Foot Traffic by Hour and Location",
+    x = "Hour of the Day",
+    y = "Location Type",
+    fill = "Traffic Level"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557"),
+    axis.title.x = element_text(face = "bold", size = 14),
+    axis.title.y = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 10)
+  )
+
+
+```
+
+
+
+
+
+
+```{r, warning=FALSE}
+
+# Define the file path for home locations
+home_locations <- "/Users/macytrout/Desktop/El Paso Parking Data/Mobility Data Cincinnati Area Businesses/Home Locations.csv"
+
+# Read the home data using the file path variable
+home_data <- read_csv(home_locations) %>%
+  rename(
+    Hashed_Id = `Hashed Ubermedia Id`,
+    Home_Lat = `Common Evening Lat`,
+    Home_Long = `Common Evening Long`,
+    Home_Census_Tract = `Common Evening Census`
+  ) %>%
+  mutate(Hashed_Id = as.character(Hashed_Id))  # Ensure the key is of type character
+
+# Rename and adjust the foot traffic data to ensure the common key ("Hashed_Id")
+foot_traffic_df <- foot_traffic_df %>%
+  rename(Hashed_Id = `Hashed Ubermedia Id`) %>%
+  mutate(Hashed_Id = as.character(Hashed_Id))  # Ensure the key is of type character
+
+# Merge the foot traffic data with the home locations
+merged_data <- foot_traffic_df %>%
+  left_join(home_data, by = "Hashed_Id") %>%
+  drop_na(Home_Lat, Home_Long)
+
+# Check the first few rows of the merged data
+head(merged_data)
+
+```
+
+
+```{r, message=FALSE, include=FALSE}
+library(tigris)
+library(ggspatial)
+library(viridis)
+library(ggplot2)
+library(dplyr)
+library(sf)
+
+
+# Disable caching to force a fresh download
+options(tigris_use_cache = FALSE)
+
+# Try loading the census tracts for El Paso, TX (year 2022) and transform to WGS84
+el_paso_tracts <- tracts(state = "TX", county = "El Paso", year = 2022, class = "sf") %>%
+  st_transform(crs = 4326)
+
+# Check the result
+head(el_paso_tracts)
+
+
+# Convert merged data (home locations) to an sf object and transform to match tracts
+home_sf <- st_as_sf(merged_data, coords = c("Home_Long", "Home_Lat"), crs = 4326, remove = FALSE) %>%
+  st_transform(crs = st_crs(el_paso_tracts))
+
+# Perform spatial join: assign each home to its corresponding census tract
+home_with_tracts <- st_join(home_sf, el_paso_tracts, join = st_within)
+
+# Count the number of visitors per census tract
+tract_counts <- home_with_tracts %>%
+  st_drop_geometry() %>%
+  group_by(GEOID) %>%
+  summarise(Visitor_Count = n(), .groups = "drop")
+
+# Merge visitor counts back into the census tracts data and replace any NA counts with 0
+el_paso_tracts <- el_paso_tracts %>%
+  left_join(tract_counts, by = "GEOID") %>%
+  mutate(Visitor_Count = replace_na(Visitor_Count, 0))
+
+# Create the map visualization with additional annotations
+ggplot() +
+  geom_sf(data = el_paso_tracts, aes(fill = Visitor_Count), color = "white", size = 0.2) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90", 
+                       name = "Visitor Count",
+                       guide = guide_colorbar(barwidth = 10, barheight = 0.5)) +
+  # Add a scale bar at the bottom left and a north arrow at the top left
+  annotation_scale(location = "bl", width_hint = 0.2, style = "ticks") +
+  annotation_north_arrow(location = "tl", which_north = "true", 
+                         pad_x = unit(0.5, "cm"), pad_y = unit(0.5, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  labs(title = "Where Visitors to El Paso Businesses Live",
+       subtitle = "Visitor counts aggregated by census tract",
+       caption = "Data sources: Home Locations & Census Tracts") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16, color = "#1D3557"),
+    plot.subtitle = element_text(face = "italic", size = 12, color = "#457B9D"),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold")
+  )
+```

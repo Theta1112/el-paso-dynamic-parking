@@ -38,7 +38,7 @@ async function loadDurationData(eventBus) {
   durationData.forEach((obj) => {
     obj.bucket = parseInt(obj.bucket)
     obj.qty = parseInt(obj.qty)
-    obj.prediction = parseInt(obj.prediction)
+    obj.prediction = parseInt(obj.predicted)
     obj.month = parseInt(obj.month)
     obj.cluster = parseInt(obj.cluster)
   });
@@ -74,6 +74,7 @@ async function loadLinegraphData(eventBus) {
     obj.occupancy = parseFloat(obj.ave_occupancy)
     obj.month = parseInt(obj.month)
     obj.cluster = parseInt(obj.cluster)
+    obj.predicted = parseFloat(obj.predicted)
   });
 
   //console.log(occupancyData)
