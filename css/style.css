@@ -340,3 +340,7 @@ body.dark-mode .modal-content {
   color: white;
 }
 
+#print-report {
+  visibility: hidden;
+}
+
