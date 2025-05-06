@@ -48,10 +48,8 @@ function initializeStreets(map, meterData, streetData, eventBus) {
     let popupContent = `
       <b>Street Name:</b> ${props.STREETNAME ?? 'N/A'} ${props.STYPE ?? ''} <br>
       <b>Street ID:</b> ${props["street.ID"] ?? 'N/A'} <br>
-      <b>Total Occupancy:</b> ${props.total_occupied ?? 'N/A'} <br>
-      <b>Max Occupied:</b> ${props.max_occupied ?? 'N/A'} <br>
-      <b>Estimated Capacity:</b> ${props["estimated.capacity"]?.toFixed(2) ?? 'N/A'} <br>
-      <b>TOC:</b> ${props.toc ?? 'N/A'} <br>
+      <b>Mean Occupancy Rate:</b> ${Math.round(props.occupancy * 100) / 100 ?? 'N/A'} <br>
+      <b>Mean TOC:</b> ${Math.round(props.toc * 100) / 100 ?? 'N/A'} <br>
     `;
 
     layer.bindPopup(popupContent);

@@ -177,3 +177,15 @@ ggplot(data = metrics) +
   theme(text = element_text(size = 20))
   
 
+clustered <- kmeans_streets(clustering.data, 6, gif = 10, seed = 521)
+# adjust with those numbers the clustering.data and GIF to get a better
+
+clustering_sf <- streets_sf %>% 
+  right_join(clustered)
+
+ggplot() + 
+  geom_sf(data = clustering_sf, aes(color = cluster), linewidth = 1.5) + 
+  scale_color_manual(values = COLOUR.VEC) +
+  guides(color="none") + 
+  theme_void()
+
