@@ -1,0 +1,1626 @@
+---
+title: "Dynamically-Priced Parking Management System"
+subtitle: "City of El Paso Planning Division | Final Report"
+author: |
+  Tutut Indriaty  
+  Sean Koh  
+  Ryan Swett  
+  Macy Trout
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+    number_sections: true
+    highlight: tango
+    df_print: paged
+    code_folding: hide
+---
+
+
+# Introduction: Parking Problems in El Paso
+
+Urban parking management sits at the crossroads of traffic flow, economic vitality, and quality of life. In El Paso, mismatches between parking **supply and demand** are widespread — some streets are overwhelmed, while others sit underused.
+
+This imbalance isn’t just inconvenient — it’s inefficient. Despite a large overall parking supply, drivers still struggle to find spots in high-demand areas. At the same time, valuable curb space often lies vacant in low-demand zones.
+
+The City of El Paso asked our team to help them take a smarter approach: to move away from **flat, one-size-fits-all pricing** and toward a system that **adapts to real demand** — by time, day, and place.
+
+> **The big idea:** Parking is like any limited resource — and when supply is fixed, the best tool to balance it with demand is **price**.
+
+---
+
+# Project Goals & Use Case
+
+El Paso’s Planning Division tasked us with a clear mission:
+
+> **Design a dynamic pricing system** to manage on-street parking using real-time and historical data — and help the City make smarter, fairer decisions about price, space, and demand.
+
+We break that mission into three major goals:
+
+- **Balance Parking Demand**  
+  Target an average **occupancy of ~80%**, ensuring availability without oversupply.
+
+- **Enable Dynamic Pricing**  
+  Use **transaction data** and **predictive models** to adjust prices by time of day, day of week, and location.
+
+- **Support Operational Decision-Making**  
+  Deliver a **dashboard tool** and set of **key performance indicators** to help city planners monitor usage, model price changes, and report outcomes to stakeholders.
+
+Together, these elements form the foundation of a **smarter parking system** — one that adjusts to El Paso’s unique rhythms while remaining transparent, efficient, and scalable.
+
+
+# What Other Cities Do: A Comparative Review of Dynamic Pricing Models
+
+Performance-based parking pricing has emerged as a powerful tool to manage urban curb space, reduce cruising, and balance supply and demand in congested downtowns. In developing El Paso’s dynamic pricing strategy, we conducted a comparative analysis of six major U.S. cities. Each has piloted or implemented demand-responsive pricing with varying levels of granularity, enforcement, and technological investment.
+
+## Seattle: Zone-Based, Citywide Deployment
+
+Seattle’s program began in 2010 with the goal of maintaining 1–2 open spaces per block face — equivalent to an 85% occupancy target. Rather than piloting individual corridors, the city implemented a citywide zone-based system grounded in parking data analysis. Adjustments are made annually based on transaction and occupancy data, covering hundreds of blocks.
+
+**Key Strengths:**
+- Simple, predictable pricing within each zone
+- Low-cost data collection model using meter data (no sensors)
+- Focus on turnover and reducing circling
+
+**Lessons for El Paso:**
+Seattle shows that zone-level pricing, when paired with regular reviews and citywide coverage, can be both scalable and effective — without the need for high-tech infrastructure.
+
+## Boston: The Case for Clear Zone Pricing
+
+Boston piloted performance-based pricing in two neighborhoods: Back Bay and Seaport. While both received flexible, time-sensitive pricing, the results differed.
+
+In **Back Bay**, prices were raised to $3.75/hour across the zone. The results:
+- 11% increase in available spaces
+- 14% decrease in double parking
+- 12% decrease in resident parking violations
+
+In **Seaport**, rates varied by block and time. Although some illegal parking declined, only a 1% increase in availability was observed.
+
+**Lessons for El Paso:**
+Boston’s results highlight the importance of clarity. Back Bay’s flat-zone pricing outperformed Seaport’s variable block-level pricing in both outcomes and public comprehension. For a city like El Paso, where pricing changes must be intuitive, district-level plans may offer greater success.
+
+## Washington, D.C.: parkDC and Multimodal Curb Management
+
+Washington, D.C.’s **parkDC** program is notable for managing not only on-street passenger parking, but also loading zones and commercial vehicle demand.
+
+Between 2014 and 2017, the pilot in Penn Quarter-Chinatown yielded:
+- 10% improvement in achieving target occupancy
+- 15% reduction in cruising time
+- 55% decline in double parking
+- 5% improvement in travel time reliability
+
+The city used real-time adjustments, supported by mobile apps, dynamic signage, and variable time limits.
+
+**Lessons for El Paso:**
+While El Paso may not currently have the infrastructure to support real-time adjustments, parkDC shows the value of integrating commercial zones and multimodal policy into curb management. The city’s ability to balance multiple priorities with pricing makes it a model for long-term planning.
+
+## San Francisco: SFpark and Sensor-Driven Precision
+
+SFpark, launched in 2011, pioneered sensor-based demand-responsive pricing, covering 6,000 metered spaces across seven districts. Prices were adjusted every eight weeks within a capped range (±$0.25–$0.50/hour) to maintain 60–80% occupancy.
+
+**Results:**
+- 43% reduction in time to find parking
+- 31% increase in time at target occupancy
+- Decreased average meter prices (by $0.11/hour)
+
+**Limitations:**
+- Price ceilings prevented certain blocks from reaching market-clearing levels
+- Expensive sensor infrastructure posed long-term maintenance concerns
+
+**Lessons for El Paso:**
+SFpark demonstrates the promise and pitfalls of hyperlocal adjustments. While its results were impressive, its cost and complexity are not feasible for smaller cities. El Paso can adopt SFpark’s principles — using meter data and capped adjustments — without its high-tech overhead.
+
+## Los Angeles: LA Express Park and Behavioral Nudges
+
+Launched in 2012, LA Express Park used performance-based pricing in Downtown LA. Hourly rates were allowed to vary between $0.50 and $6.00 depending on demand, updated periodically based on meter and sensor data.
+
+**Results:**
+- Increased occupancy in underused areas
+- Increased overall revenue
+- Decreased cruising
+- Maintained or lowered average rates in most areas
+
+**Lessons for El Paso:**
+Los Angeles’ experience underscores how pricing flexibility — especially in underused zones — can nudge drivers toward more efficient curb use. Its success validates capped rate ranges and geographic variability, which are achievable even without sensors.
+
+## Baltimore: Human-Centered Parking Strategy
+
+Baltimore implemented a biannual, demand-responsive pricing system guided by principles of equity and multimodal access. Price increases or decreases of up to $0.25/hour were made depending on occupancy. The city emphasized curb optimization over revenue generation.
+
+**Broader Impacts:**
+- Data-driven rate adjustments based on anonymized meter data
+- Reinvestment of parking revenue into pedestrian, biking, and transit infrastructure
+- Stronger public trust through transparency and cross-agency collaboration
+
+**Lessons for El Paso:**
+Baltimore illustrates how parking policy can support broader goals — not just congestion and turnover, but equity, sustainability, and mode shift. El Paso may benefit from similarly aligning parking reforms with multimodal transportation planning.
+
+---
+
+
+# Data Sources & Cleaning
+
+This analysis draws on several datasets provided by the City of El Paso and mobility data vendors. The primary data sources include:
+
+- **Meter Transaction Data**  
+  Sourced from the City’s Parking Management Division, this dataset logs all paid parking activity across El Paso meters, including start times, durations, and meter IDs.
+
+- **Occupancy Estimates**  
+  Generated by matching meter transactions to nearby street segments, this dataset approximates hourly occupancy levels over a 12-month period using inferred parking durations and capacity thresholds.
+
+- **Foot Traffic Data**  
+  Provided by a third-party location data aggregator, this anonymized dataset estimates pedestrian activity near commercial locations based on mobile device signals.
+
+- **Spatial Data**  
+  Street centerlines and meter locations were obtained from the City’s GIS Department and used to spatially join transactions, occupancy, and cluster analysis.
+
+Together, these datasets enable a detailed analysis of parking demand patterns, occupancy trends, and mobility behaviors across time and geography in El Paso.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup2, include=FALSE, warning=FALSE}
+
+# Load required libraries
+library(sf)
+library(dplyr)
+library(lubridate)
+library(data.table)
+library(stringr)
+library(tidyverse)
+library(ggplot2)
+library(forcats)
+library(viridis)
+
+# -------------------------------
+# 1. Foot Traffic Data
+# -------------------------------
+
+foot_traffic_file <- "/Users/ryanswett/Downloads/Spring2025/Practicum/Home Locations-DESKTOP-MO52HOV.csv"
+foot_traffic_df <- read_csv(foot_traffic_file)
+# Check the data
+head(foot_traffic_df)
+
+# -------------------------------
+# 2. 12-Month Occupancy Data
+# -------------------------------
+occupancy_file <- "/Users/ryanswett/Downloads/Spring2025/Practicum/12_months.csv"
+occupancy_12month_df <- read_csv(occupancy_file)
+occupancy_12month_df_cleaned <- occupancy_12month_df %>%
+  mutate(date = date(occupancy.buckets),
+         hour = hour(ymd_hms(occupancy.buckets, quiet = F)),
+         minute = minute(ymd_hms(occupancy.buckets, quiet = F)),
+         hour = replace_na(hour, 0),
+         minute = replace_na(minute, 0),
+         timestamp = date + hours(hour) + minutes(minute)) %>% 
+  filter(!is.na(street.ID)) %>%
+  filter(wday(timestamp) != 1) %>%
+  filter(street.ID != 24507)
+
+occupancy_12month_df_filtered <- occupancy_12month_df_cleaned %>%
+  filter(hour >= 8 & hour < 18)
+
+COLOUR.VEC <- c('#e41a1c',
+  '#377eb8',
+  '#4daf4a',
+  '#984ea3',
+  '#ff7f00',
+  '#f781bf',
+  '#a65628',
+  '#999999')
+
+# -------------------------------
+# 3. PEM Transactions Data
+# -------------------------------
+pems_file1 <- "/Users/ryanswett/Downloads/Spring2025/Practicum/pems transactions jan-jun2024.csv"
+pems_file2 <- "/Users/ryanswett/Downloads/Spring2025/Practicum/pems transactions jul-dec2024.csv"
+pems_transactions_df <- rbind(
+  fread(pems_file1),
+  fread(pems_file2)
+)
+# Optional: Remove erroneous rows if needed
+pems_transactions_df <- pems_transactions_df %>% filter(row_number() != 839435)
+
+
+# -------------------------------
+# 4. Streets Data (EPCenterline.geojson)
+# -------------------------------
+streets_geojson_path <- "/Users/ryanswett/Downloads/Spring2025/Practicum/EPCenterline.geojson"
+
+streets_sf <- st_read(streets_geojson_path) %>%
+  rename(street.ID = "OBJECTID_1")  # Replace OBJECTID_1 with actual column name if different
+
+
+# Prepares data for clustering operation
+prepare.clustering.data <- function(data, streets_sf) {
+  # Get distinct streets
+  streets <- data %>% 
+    filter(!is.na(street.ID)) %>%
+    distinct(street.ID) %>%
+    arrange(street.ID)
+  
+  # Join to streets.sf to get geom data
+  street.centres <- streets_sf %>% 
+    right_join(streets) %>%
+    st_centroid() %>%
+    st_coordinates()
+  
+  # Join street centres back
+  streets$lon = street.centres[,1]
+  streets$lat = street.centres[,2]
+  
+  streets <- streets %>%
+    mutate(lon = (lon - mean(lon)) / sd(lon),
+           lat = (lat - mean(lat)) / sd(lat))
+  
+  for (dotw.iter in min(wday(data$timestamp)):max(wday(data$timestamp))) {
+    for(hour.iter in min(data$hour):max(data$hour)) {
+      streets[[paste0('dotw_',dotw.iter, '_hr_', hour.iter)]] <- data %>%
+        filter(hour == hour.iter & wday(timestamp) == dotw.iter) %>%
+        group_by(street.ID) %>%
+        summarise(value = mean(occupied_fraction_99)) %>%
+        arrange(street.ID) %>%
+        pull(value)
+    }
+  }
+
+  
+  return(streets)
+}
+
+
+# Normalize and scale coordinates. Then perform k means.
+# geographic inflation factor (gif): represents how much importance geography is to clustering 
+kmeans_streets <- function(clustering.data, k, gif = 1, streets.sf = NA, seed = NA) {
+  
+  if (is.numeric(seed)) {
+    set.seed(seed)
+  }
+  
+  clustering.data <- clustering.data %>%
+    mutate(lon = gif * lon,
+           lat = gif * lat)
+  
+  # Perform k means and assign clusters
+  clustering.data$cluster <- factor(kmeans(clustering.data %>% select(-street.ID), k)$cluster)
+  
+  p <- NA
+  
+  if (!is.null(dim(streets_sf))) {
+    clustering.data.sf <- streets_sf %>% 
+      right_join(clustering.data)
+    
+    p <- ggplot() + 
+      geom_sf(data = clustering.data.sf, aes(color = cluster)) + 
+      scale_color_manual(values = COLOUR.VEC) +
+      theme_void()
+    
+    print(p)
+  }
+  
+  
+  return(clustering.data)
+}
+
+
+
+# -------------------------------
+# 5. Meters Data (meters.geojson)
+# -------------------------------
+meters_geojson_path <- "/Users/ryanswett/Downloads/Spring2025/Practicum/meters.geojson"
+meters_sf <- st_read(meters_geojson_path)
+
+
+# 1. Convert datetime and extract date/time columns
+transactions_date_df <- pems_transactions_df %>%
+  mutate(
+    # Convert 'datetime' column to a proper datetime object
+    datetime_parsed = mdy_hm(datetime),
+    # Separate date and time
+    date_only = format(datetime_parsed, "%m/%d/%Y"),
+    time_only = format(datetime_parsed, "%H:%M")
+  )
+
+# 2. Calculate average minutes paid per weekday (excluding Sunday)
+avg_min_per_dayweek <- pems_transactions_df %>%
+  group_by(dayweek) %>%
+  summarise(
+    total_min = sum(min_paid, na.rm = TRUE),
+    unique_days = n_distinct(date)
+  ) %>%
+  mutate(
+    # Round average minutes per unique day
+    avg_min_per_day = round(total_min / unique_days),
+    # Factor dayweek in a logical order
+    dayweek = factor(dayweek, levels = c(
+      "Monday", "Tuesday", "Wednesday", "Thursday",
+      "Friday", "Saturday", "Sunday"
+    ))
+  ) %>%
+  arrange(dayweek) %>%
+  # Optional: Exclude Sunday if desired
+  filter(dayweek != "Sunday") %>%
+  # Add a day category (Weekday vs. Weekend)
+  mutate(day_category = case_when(
+    dayweek %in% c("Monday", "Tuesday", "Wednesday", "Thursday") ~ "Weekday",
+    dayweek %in% c("Friday", "Saturday") ~ "Weekend"
+  ))
+
+```
+
+
+# Our Proposed Program Design for El Paso
+
+We propose a **three-part system** to bring dynamic pricing to El Paso in a way that is scalable, cost-effective, and grounded in local behavior:
+
+## Data-Driven Districts
+
+Instead of using arbitrary boundaries or land use labels, we use clustering analysis on parking occupancy data to create **districts with similar demand patterns**. These districts become the foundation for pricing decisions.
+
+> Districts strike a balance between simplicity and precision — they’re easier for drivers to understand than street-by-street pricing, but still responsive to real behavior.
+
+## Real-Time Monitoring Using Existing Data
+
+Rather than install new sensors, we build our system around **existing meter transactions**. These records already capture when and where people park — offering a scalable, low-cost way to track demand.
+
+> Even with limited infrastructure, we can build a responsive system by using the data El Paso already collects.
+
+## Predictive Modeling to Set Prices
+
+Using historical patterns and temporal trends, we train **district-level regression models** to predict occupancy across time — by hour, day, and day-of-week. These forecasts support price adjustments **before** crowding becomes a problem.
+
+> By forecasting demand, the City can adjust prices proactively — not just reactively.
+
+---
+
+These components form the foundation of a **flexible, data-driven parking management system** for El Paso. Starting with a pilot and gradually expanding citywide, this program offers the City a way to reduce congestion, improve turnover, and boost public satisfaction — without the burden of high infrastructure costs.
+
+
+# Understanding the Rhythms of Parking Demand (EDA)
+
+Before we can design a dynamic pricing system, we must understand **when, where, and why** people park in El Paso. Exploratory data analysis allows us to surface these patterns — revealing not only peaks and lulls in demand, but also how foot traffic, duration, and occupancy vary across space and time.
+
+In this section, we dive into the City’s transaction records, mobility data, and spatial infrastructure to answer key questions:
+
+- When is parking demand highest?
+- Do weekends behave differently than weekdays?
+- Where are curbs consistently over- or under-used?
+- How long do people typically park — and does that change by day?
+
+These insights form the empirical backbone of our dynamic pricing strategy. By uncovering trends in how El Paso’s streets are used, we can design a system that’s not only efficient, but **responsive to local behavior**.
+
+**Foot Traffic Analysis**
+
+```{r, warning=FALSE}
+
+foot_traffic_df_clean <- foot_traffic_df %>%
+  # Keep only rows that have non-missing date, time, and day-of-week
+  filter(!is.na(Date), !is.na(Time), !is.na(`Day of Week`)) %>%
+  mutate(
+    # Combine Date + Time into a single datetime (adjust time zone if needed)
+    DateTime = mdy_hms(paste(Date, Time), tz = "America/Denver", quiet = TRUE),
+    # Extract the hour from DateTime
+    Hour = hour(DateTime)
+  ) %>%
+  # Remove rows where hour didn't parse properly
+  filter(!is.na(Hour))
+
+
+# Plot the hourly distribution (histogram plus density overlay)
+ggplot(foot_traffic_df_clean, aes(x = Hour)) +
+  geom_histogram(binwidth = 1, fill = "#457B9D", color = "white", alpha = 0.85) +
+  geom_density(aes(y = ..count..), color = "#E63946", linewidth = 1.2, alpha = 0.8) +
+  labs(
+    title = "Hourly Foot Traffic",
+    x = "Hour of the Day",
+    y = "Number of Visitors"
+  ) +
+  theme_minimal(base_size = 14) +
+  scale_x_continuous(breaks = seq(0, 23, by = 2))
+
+```
+
+**Figure 1: Hourly Foot Traffic**
+
+*What does a day in El Paso feel like on foot?*
+In the quiet early hours, the city stirs slowly — only a few visitors are out. As the morning unfolds, activity builds steadily, reaching a clear peak around midday. This plot captures that daily rhythm: tall bars and a smooth red density curve highlight the rise, climax, and gradual tapering of foot traffic over the course of a day.
+
+*Why does this matter for parking?*
+These peaks and valleys in foot activity often align with surges and lulls in parking demand. Recognizing these patterns is foundational to a smarter pricing system — one that can charge more when curb space is scarce and ease rates when it’s not. This insight also informs how we grouped city blocks into pricing districts and built predictive models that anticipate when and where demand will spike.
+
+
+
+```{r, warning=FALSE, message=FALSE}
+library(scales)
+# Clean the foot traffic data using Date, Time, and Day of Week from the CSV
+foot_traffic_df_clean <- foot_traffic_df %>%
+  filter(!is.na(`Day of Week`), !is.na(Time)) %>% 
+  mutate(
+    # Trim any extra spaces in the Day of Week column
+    Day_of_Week_clean = str_trim(`Day of Week`),
+    # Create a new variable Day_Type based on custom grouping:
+    # Weekend: Thu, Fri, Sat; Weekday: Sun, Mon, Tue, Wed
+    Day_Type = if_else(Day_of_Week_clean %in% c("Fri", "Sat", "Sun"), "Weekend", "Weekday"),
+    # Extract Hour from Time assuming the Time format is "HH:MM" or "HH:MM:SS"
+    Hour = as.numeric(substr(Time, 1, 2))
+  ) %>%
+  filter(!is.na(Hour))
+
+
+# Plot hourly foot traffic, faceted by Day_Type (Weekend vs. Weekday)
+ggplot(foot_traffic_df_clean, aes(x = Hour)) +
+  geom_histogram(binwidth = 1, fill = "#457B9D", color = "white", alpha = 0.85) +
+  geom_density(aes(y = ..count..), color = "#E63946", linewidth = 1.2, alpha = 0.8) +
+  facet_wrap(~ Day_Type) +
+  labs(
+    title = "Hourly Foot Traffic by Weekday vs. Weekend",
+    subtitle = "Custom grouping: Weekend (Fri-Sun); Weekday (Mon-Thurs)",
+    x = "Hour of the Day",
+    y = "Number of Visitors",
+    caption = "Source: Mobility Data"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 18, color = "#1D3557"),
+    plot.subtitle = element_text(size = 14, color = "#457B9D"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    strip.text = element_text(size = 14, face = "bold"),
+    panel.grid.major = element_line(color = "grey80", linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "#F8F9FA", color = NA)
+  ) +
+  scale_x_continuous(breaks = seq(0, 23, by = 2))
+
+```
+
+**Figure 2: Foot Traffic by Hour and Day Type (Weekday vs. Weekend)**
+
+*How does parking demand shift with the rhythm of the week?*
+On weekdays, foot traffic rises early and follows a steady, predictable curve — mirroring traditional workday routines. But on weekends, the city pulses differently. Activity starts later, builds gradually, and peaks in the afternoon or early evening, reflecting leisure and entertainment patterns.
+
+This visualization splits that rhythm in two: weekday versus weekend. Each panel paints a distinct picture of how people move through El Paso’s streets, highlighting when curb space is most and least in demand.
+
+*Why does this matter?*
+Understanding these divergent patterns lets us design pricing that’s not just dynamic — but intuitive. Higher rates during peak leisure hours on weekends, and lower prices during low-activity weekday stretches, help smooth demand, improve turnover, and support both businesses and residents in a way that fits how people actually use the city.
+
+
+**Parking Duration Analysis:**
+
+```{r EDA}
+# Parking Duration Histogram
+ggplot(pems_transactions_df %>% filter(min_paid > 0), aes(x = min_paid)) +
+  geom_histogram(binwidth = 15, fill = "#2c7fb8", color = 'white') +
+  scale_x_continuous(
+    breaks = seq(0, max(pems_transactions_df$min_paid), by = 60)
+  ) +
+    scale_y_continuous(labels = comma) +
+  labs(
+    title = "Parking Duration at Metered Spaces",
+    subtitle = "El Paso, TX (2024)",
+    x = "Minutes Paid",
+    y = "Number of Transactions"
+  ) +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", color = "#3c3c3c", family = "Georgia", hjust = 0.5),
+    plot.subtitle = element_text(size = 14, face = "italic", color = "#666666", family = "Georgia", hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold", color = "#333333"),
+    axis.title.y = element_text(size = 12, face = "bold", color = "#333333")
+  )
+```
+
+**Figure 3: Parking Duration at Metered Spaces (Raw Data)**
+
+*What do we see?*
+At first glance, this histogram shows an extremely skewed pattern: the overwhelming majority of parkers in El Paso pay for **less than one hour**, with a sharp drop-off beyond 60 minutes. This indicates that most parking sessions are short-term, consistent with quick errands, short visits, or local business activity.
+
+*Why it matters:*
+While a few longer-duration transactions exist (up to 11 hours), they are statistical outliers. Including them in the initial view obscures important patterns in the more common, everyday behavior. This plot reveals the need to filter out these outliers in order to better understand the **core distribution** of parking habits.
+
+
+```{r}
+# Parking Duration Histogram with outliers removed
+
+# Remove outliers
+valid <- pems_transactions_df %>% filter(min_paid > 0)
+Q1 <- quantile(valid$min_paid, 0.25)
+Q3 <- quantile(valid$min_paid, 0.75)
+IQR <- Q3 - Q1
+
+filtered_df <- valid %>% 
+  filter(min_paid >= (Q1 - 1.5 * IQR), min_paid <= (Q3 + 1.5 * IQR))
+
+# Create histogram of filtered data
+ggplot(filtered_df, aes(x = min_paid)) +
+  geom_histogram(binwidth = 15, fill = "#2c7fb8", color = "white") +
+  scale_x_continuous(
+    breaks = seq(0, max(filtered_df$min_paid), by = 15)  
+  ) +
+    scale_y_continuous(labels = comma) +  
+  labs(
+    title = "Parking Duration at Metered Spaces",
+    subtitle = "El Paso, TX (2024)",
+    x = "Minutes Paid",
+    y = "Number of Transactions"
+  ) +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", color = "#3c3c3c", family = "Georgia", hjust = 0.5),
+    plot.subtitle = element_text(size = 14, face = "italic", color = "#666666", family = "Georgia", hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold", color = "#333333"),
+    axis.title.y = element_text(size = 12, face = "bold", color = "#333333"))
+```
+
+**Figure 4: Parking Duration at Metered Spaces (Outliers Removed)**
+
+*What do we see now?*
+
+With extreme durations removed, the picture sharpens: most transactions cluster around **15–60 minutes**, with a clear peak at **30 minutes**. This refined view gives us a much more actionable sense of how long El Paso drivers typically occupy metered spaces.
+
+*Implications for pricing:*
+
+Understanding these patterns is critical for setting optimal time limits and rate structures. For example:
+	•	If most people park for 30–60 minutes, then pricing should encourage **high turnover** in these windows.
+	•	Longer durations (e.g., 90–120 minutes) might justify **premium pricing tiers** to discourage lingering in high-demand areas.
+
+Together, these figures suggest a clear opportunity: design parking rates that reflect how most drivers actually behave — and gently nudge them toward turnover-friendly durations in crowded zones.
+
+
+
+## Clustering Streets by Behavior: Why Districts Make More Sense
+
+When it comes to pricing curb space, should we charge differently by each block or group them into zones?
+
+Street-by-street pricing might sound precise, but in practice, it’s confusing for drivers and difficult to manage for cities. Instead, we took a more strategic approach — clustering streets into **behavioral districts** based on **how, when, and how much people park**.
+
+This gives us the best of both worlds:
+
+- **More precision than static citywide pricing**
+
+- **More clarity than hyperlocal, unpredictable changes**
+
+By grouping streets with **similar demand patterns**, we can set one clear rate per cluster — making pricing easier to understand and administer while still responsive to real behavior.
+
+**Our Methodology: Data-Driven Districting**
+
+We used `k-means clustering` to group streets with similar occupancy patterns across the week. Our process followed three main steps:
+
+**Step 1: Build the Feature Set**
+
+For each street segment, we calculated its **average occupancy** by **hour and day of week** (Monday–Saturday, 8 AM–6 PM), using 12 months of transaction data. This created a "behavioral signature" for every street — a kind of time-based fingerprint for demand.
+
+We also included **spatial coordinates (longitude and latitude)** so the algorithm could consider geography when grouping.
+
+**Step 2: Normalize and Apply Geographic Weight**
+
+To make sure both behavior and geography were considered in clustering, we normalized all inputs and applied a **geographic inflation factor (GIF)** to give some weight to location.
+
+This encouraged the algorithm to favor clusters of streets that are not only behaviorally similar but also **spatially coherent**.
+
+
+
+```{r, cluster patterns, warning=FALSE, message=FALSE}
+
+plot.cluster.patterns <- function(data.clustered, input.dotw) {
+  
+  cluster.grouped <- data.clustered %>% 
+    mutate(dotw = wday(timestamp)) %>%
+    group_by(hour, street.ID, dotw, cluster)
+  
+  plot.day <- case_when(
+    input.dotw == 1 ~ "Sunday",
+    input.dotw == 2 ~ "Monday",
+    input.dotw == 3 ~ "Tuesday",
+    input.dotw == 4 ~ "Wednesday",
+    input.dotw == 5 ~ "Thursday",
+    input.dotw == 6 ~ "Friday",
+    input.dotw == 7 ~ "Saturday",
+    T ~ "Unknown")
+  
+  p <- ggplot(data = cluster.grouped %>%
+                filter(dotw == input.dotw) %>%
+                summarise(occupied_fraction = mean(occupied_fraction_95))) +
+    geom_line(aes(x = hour, 
+                  y = occupied_fraction, 
+                  group = street.ID, 
+                  color = cluster)) +
+    scale_color_manual(values = COLOUR.VEC) + 
+    geom_line(data = cluster.grouped %>%
+                group_by(hour, dotw, cluster) %>%
+                filter(dotw == input.dotw) %>%
+                summarise(occupied_fraction = mean(occupied_fraction_95)),
+              aes(x = hour, y = occupied_fraction), color = "black", size = 1.8) + 
+    geom_vline(xintercept = 18, linetype="dashed") + 
+    facet_wrap(~cluster, nrow = 2) + 
+    ylim(0,1) + 
+    labs(y = "Average Street Occupancy", 
+         title = paste("Average Street Occupancy Patterns on", plot.day))
+  
+  print(p)
+}
+
+
+# Prepare data for clustering
+clustering.data <- prepare.clustering.data(occupancy_12month_df_filtered,
+                                           streets_sf)
+
+clustered <- kmeans_streets(clustering.data, 6, gif = 3.7, seed=521)
+# adjust with those numbers the clustering.data and GIF to get a better
+
+clustering_sf <- streets_sf %>% 
+      right_join(clustered)
+
+
+ggplot() + 
+  geom_sf(data = clustering_sf, aes(color = cluster), linewidth = 1) + 
+  scale_color_manual(values = COLOUR.VEC) +
+  theme_void()
+
+
+# clustering_sf$color <- 
+
+# st_write(clustering_sf, "data/clustered.geojson")
+
+
+    
+```
+
+**Step 3: Visualize the Clusters**
+
+After clustering, we joined the cluster IDs back to the original street geometry and visualized them to confirm they made logical, spatial sense.
+
+
+**Behavioral Differences Between Clusters**
+
+To validate the clustering, we plotted **hourly occupancy trends** across the week for each cluster. These charts reveal how some clusters peak in the morning, some in the afternoon, and others remain consistently occupied.
+
+```{r cluster-patterns-weekday, warning=FALSE, message=FALSE}
+# Join cluster information back onto data
+data.clustered <- occupancy_12month_df_cleaned %>% 
+  filter(!is.na(street.ID)) %>%
+  left_join(clustered %>% dplyr::select(street.ID, cluster))
+
+# Plot out the occupancy pattern over a particular day across clusters
+plot.cluster.patterns(data.clustered, 4)
+# three is wednesday 
+
+```
+
+
+```{r cluster-patterns-weekend, warning=FALSE, message=FALSE}
+# Plot out the occupancy pattern over a particular day across clusters
+plot.cluster.patterns(data.clustered, 7)
+# 7 is saturday
+```
+
+
+**Interpreting District Occupancy Patterns: Clusters 3 and 5**
+
+The plots above show average occupancy patterns by hour across different clusters on both a **weekday (Wednesday)** and a **weekend day (Saturday)**. Each pane represents a behavior-based cluster, with the black line showing the cluster-wide average and colored lines representing individual streets.
+
+
+**Cluster 3: High Demand on Weekdays, But Vanishes on Weekends**
+
+Cluster 3 is a classic example of a **government or institutional zone** — with **sharp peaks in occupancy during the workday on Wednesday**, and a near-complete drop-off by Saturday. This pattern suggests commuter-driven parking tied to office hours, likely reflecting proximity to courthouses, admin buildings, or universities.
+
+> This area is **not a candidate** for higher weekend pricing — in fact, it may benefit from **reallocated curb space** (like open streets, community events, or vendor stalls) when demand plummets on weekends.
+
+
+**Cluster 5: Consistent Demand Across the Week**
+
+Cluster 5 stands out for its **strong, sustained parking demand across both weekdays and weekends**. While the weekday curve is slightly flatter, the Saturday pattern shows continued demand throughout the afternoon. This is likely a **mixed-use or commercial entertainment zone** — perhaps home to restaurants, retail, and nightlife.
+
+> Because of its consistent activity, Cluster 5 is a **prime candidate for dynamic pricing** — especially increasing evening or weekend rates to improve turnover, reduce circling, and support local businesses.
+
+Together, these plots demonstrate why pricing **by cluster, not just by time**, makes sense. What works for Cluster 5 would be counterproductive in Cluster 3 — and vice versa. A one-size-fits-all pricing model wouldn’t capture these differences.
+
+```{r metric-test, warning=FALSE, message=FALSE}
+
+# Compute some metrics at a street level
+metrics <- data.clustered %>%
+  filter(hour >= 9 & hour <17 & wday(timestamp) != 1) %>%
+  group_by(street.ID, cluster) %>%
+  summarise(bucket = n(),
+            total_toc = sum(occupied_fraction_95 > 0.7),
+            total_twc = sum(occupied_fraction_95 < 0.7 & 
+                              occupied_fraction_95 > 0.3),
+            toc = round(total_toc / bucket,2),
+            twc = round(total_twc / bucket,2),
+            ave_occupancy = round(mean(occupied_fraction_95),2)) %>%
+  dplyr::select(-bucket, -total_toc, -total_twc)
+
+function_line <- function(custom_fun, xmin = 0, xmax = 1){
+  x.data <- seq(xmin, xmax, length.out = 100)
+  out <- data.frame(x = x.data,
+                    y = custom_fun(x.data))
+  return(
+    geom_line(data = out, aes(x = x, y = y))
+  )
+}
+
+# Relationship between average occupancy and toc
+ggplot(data = metrics) + 
+  geom_point(aes(x = ave_occupancy, y = toc)) +
+  function_line(function(x) x^1.9)
+
+```
+
+
+```{r decision-metrics}
+
+# Experimentation with time within capacity and time over capacity
+cluster.metrics <- data.clustered %>%
+  filter(hour >= 9 & hour <17 & wday(timestamp) != 1) %>%
+  group_by(cluster) %>%
+  summarise(bucket = n(),
+            total_toc = sum(occupied_fraction_95 > 0.7),
+            total_twc = sum(occupied_fraction_95 < 0.7 & 
+                              occupied_fraction_95 > 0.3),
+            toc = round(total_toc / bucket,2),
+            twc = round(total_twc / bucket,2),
+            ave_occupancy = round(mean(occupied_fraction_95),2)) %>%
+  dplyr::select(-bucket, -total_toc, -total_twc)
+
+
+cluster.metrics
+```
+
+
+The figure above and the accompanying summary table help us interpret **how each cluster behaves in terms of parking demand**, particularly focusing on:
+
+- **Average Occupancy (`ave_occupancy`)**: the mean fraction of time a street segment is occupied between 9 AM and 5 PM on weekdays.
+- **Time Over Capacity (`toc`)**: the proportion of observations where occupancy exceeded 70% — our threshold for likely scarcity.
+- **Time Within Capacity (`twc`)**: the proportion of time when occupancy was within the ideal range (30%–70%) — a sweet spot for efficient yet available curb usage.
+
+**What the Scatterplot Shows**
+
+The scatterplot visualizes the **relationship between average occupancy and time over capacity (ToC)** for all street segments. The fitted curve (in black) demonstrates a **nonlinear relationship** — as average occupancy increases, the likelihood of exceeding capacity **rises exponentially**.
+
+> This reinforces the importance of managing high-occupancy corridors carefully. Even small increases in average occupancy can push a street past the tipping point, leading to parking scarcity and cruising.
+
+**What the Summary Table Tells Us**
+
+The table summarizes these metrics across the **six behavior-based clusters** we created:
+
+- **Clusters 1–3** have **lower average occupancy** (0.24–0.29) and minimal ToC, suggesting consistent availability and low demand — ideal for potential rate reductions or flexible use policies.
+- **Clusters 4–5** show **much higher ToC and TwC**, with average occupancy nearing **50%**, indicating more active zones. These are **candidates for dynamic pricing** to mitigate crowding and improve turnover.
+- **Cluster 6** is moderate but shows potential for demand growth. It could benefit from **targeted monitoring**.
+
+Together, this analysis supports our broader strategy:  
+
+> Use data-driven clusters to guide differentiated pricing, ensuring we optimize each curb segment based on real-world use.
+
+
+*Overall Why This Approach Works*
+
+This cluster-based method lets us:
+
+- Match pricing to **real behavior**, not zoning labels.
+- Avoid confusing micromanagement on a block-by-block basis.
+- Scale pricing and forecasting across the city.
+- Communicate clearly with the public: *one price per district, based on data.*
+
+> In short: we’re not just drawing zones — we’re mapping **parking behavior.**
+
+
+**Occupancy Heatmap by Day and Time**
+
+The maps below visualize foot traffic density across El Paso by **day of the week** (top) and **time of day** (bottom), using anonymized location data collected between 2019 and 2022.
+
+*What We See*
+
+- **Weekday Patterns**: From Monday to Friday, the **downtown core** consistently exhibits high levels of foot traffic, especially around government, office, and transit nodes. This reaffirms the downtown’s role as a commuter and administrative hub.
+  
+- **Saturday Surge**: On Saturdays, we see a **clear geographic shift**. Foot traffic intensifies **eastward along I-10**, especially in areas aligned with retail corridors and entertainment venues. This highlights El Paso’s **weekend activity nodes**—a key opportunity for adjusting rates based on demand shifts.
+  
+- **Time-of-Day Dynamics**:  
+  - In the **Morning**, traffic is light and concentrated around employment zones.  
+  - By **Midday**, activity blooms citywide, especially in central commercial areas.  
+  - **Afternoon maps** show lingering presence in areas with dining, events, or shopping appeal, particularly on weekends.
+
+*Why It Matters*
+
+These spatiotemporal patterns guide where and when demand-responsive pricing can be most effective:
+
+- Zones with **weekday peaks** (e.g., downtown) may need higher **morning and midday rates** to promote turnover and reduce circling.
+- Areas with **weekend footfall** (e.g., shopping corridors) should consider raising **afternoon/evening prices** on Fridays and Saturdays to reflect increased demand.
+- Conversely, low-traffic areas during off-peak times could **lower prices** or even offer promotional rates to encourage usage.
+
+> These insights validate our clustering strategy and provide a granular picture of how parking demand mirrors human movement across El Paso.
+
+```{r, warning=FALSE, message=FALSE, results='hide'}
+# Heat Maps Data Prep
+
+# Clean data
+foot_traffic_df <- foot_traffic_df %>%
+  mutate(
+    Date = mdy(Date), 
+    Time = hms(Time),
+    Hour = hour(Time)
+  )
+foot_traffic_df <- foot_traffic_df %>%
+  drop_na(`Polygon Name`, `Hashed Ubermedia Id`, `Hour`)
+foot_traffic_df <- foot_traffic_df %>%
+  group_by(`Polygon Name`) %>%
+  mutate(Device_Count = n_distinct(`Hashed Ubermedia Id`)) %>%
+  ungroup()
+foot_traffic_clean <- foot_traffic_df %>%
+  drop_na(`Common Evening Long`, `Common Evening Lat`)
+foot_traffic_clean <- foot_traffic_clean %>%
+  filter(`Common Evening Long` > -107, `Common Evening Long` < -106,
+         `Common Evening Lat` > 31.4, `Common Evening Lat` < 32)
+foot_traffic_sf <- st_as_sf(foot_traffic_clean, coords = c("Common Evening Long", "Common Evening Lat"), crs = 4326, remove = FALSE)
+st_bbox(foot_traffic_sf)
+
+# Create data frames for day of the week
+mon_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Mon")
+tue_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Tue")
+wed_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Wed")
+thu_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Thu")
+fri_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Fri")
+sat_foot_traffic_sf <- foot_traffic_sf %>%
+  filter(`Day of Week` == "Sat")
+
+# Create data frames for time of day
+filtered_foot_traffic_sf <- foot_traffic_sf %>%
+  mutate(
+    Hour = as.integer(str_extract(Time, "^\\d+(?=H)"))
+  )
+filtered_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 8, Hour <= 18)
+
+morn_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 8 & Hour <= 11)
+midd_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 12 & Hour <= 15)
+after_foot_traffic_sf <- filtered_foot_traffic_sf %>%
+  filter(Hour >= 16 & Hour <= 18)
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+# Heat map plots for day of the week
+library(patchwork)
+# Monday
+mon <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(mon_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Monday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Tuesday
+tue <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(tue_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Tuesday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Wednesday
+wed <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(wed_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Wednesday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(), 
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),  
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Thursday
+thu <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(thu_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Thursday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(), 
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Friday
+fri <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(fri_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Friday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") + 
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),   
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Saturday
+sat <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(sat_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Saturday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+dayweek_combined_plot <- (mon | tue | wed) /
+                 (thu | fri | sat) +
+  plot_annotation(
+    title = "Foot Traffic by Day of the Week", 
+    subtitle = "El Paso, TX (2019-2022)"
+  )
+
+dayweek_combined_plot
+```
+
+
+
+```{r, meassage=FALSE, warning=FALSE}
+# Heat map plots by time of day
+
+# Morning
+morn <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(morn_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Morning",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Midday
+midd <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(midd_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Midday",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+# Afternoon
+after <- ggplot() +
+    geom_sf(data = streets_sf, color = "black", size = 0.2, alpha = 0.3) +  
+    stat_density_2d(
+      data = as.data.frame(st_coordinates(after_foot_traffic_sf)),  
+      aes(x = X, y = Y, fill = ..level..), 
+      geom = "polygon", alpha = 0.8  
+    ) +
+    coord_sf(crs = 4326) +
+    scale_x_continuous(limits = c(-106.7, -106.2)) +  
+    scale_y_continuous(limits = c(31.7, 32)) +  
+    labs(
+      title = "Afternoon",  
+      x = NULL,  
+      y = NULL   
+    ) +
+    scale_fill_viridis_c(name = "Density Level", option = "C") +  
+    theme_minimal(base_size = 12) +  
+    theme(
+      axis.text.x = element_blank(),  
+      axis.text.y = element_blank(),  
+      axis.ticks = element_blank(),  
+      axis.title = element_blank(),   
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5, color = "black"),  
+      plot.caption = element_text(size = 10, color = "gray40", hjust = 1),  
+      panel.grid.major = element_line(color = "gray90", size = 0.2),  
+      panel.grid.minor = element_blank(),  
+      legend.position = "none"  
+    )
+
+timday_combined_plot <- (morn | midd | after) + 
+  plot_annotation(
+    title = "Foot Traffic by Time of Day", 
+    subtitle = "El Paso, TX (2019-2022)"
+  )
+
+timday_combined_plot
+```
+
+# Predictive Modeling by Cluster
+
+After identifying behavior-based parking districts, we built **simple linear regression models** to forecast occupancy levels across different **times of day** and **days of the week** — tailored to each cluster.
+
+This modeling step helps the City of El Paso anticipate when demand will rise or fall **before** it happens, so rates can be adjusted proactively, not just reactively.
+
+
+## What We Did
+
+- **Grouped data by cluster**: Each behavior-based district (cluster) has unique patterns — so we trained one model per cluster.
+
+- **Created time-of-day and day-of-week variables**:  
+  We transformed timestamps into two key predictors:  
+  - `dotw` (Day of the Week): Sunday to Saturday  
+  - `time_of_day`: Morning (8–12 AM), Midday (12–4 PM), Afternoon (4–6 PM)
+
+- **Fit linear models**:  
+  For each cluster, we ran a linear regression:
+  
+$$
+\texttt{occupied\_fraction\_95} \sim \texttt{dotw} \times \texttt{time\_of\_day}
+$$
+
+
+This estimates how occupancy rates shift across **combinations of weekday and time band**.
+
+- **Generated model summaries**:  
+- `tidy()` extracts model coefficients — showing which times see higher or lower occupancy.  
+- `glance()` gives overall model diagnostics like R² and AIC.
+
+
+## Why It Matters
+
+These models power the **predictive pricing engine**. By estimating future occupancy, the City can:
+
+- **Raise prices** when occupancy is projected to exceed 80%  
+- **Lower prices** in low-demand periods to improve utilization  
+- **Stabilize rates** in districts operating within target ranges (70–80%)
+
+> In short: This lets El Paso run a **data-informed, forward-looking pricing system**, tailored to each curb district’s unique rhythm.
+
+
+```{r model-cluster, warning=FALSE}
+library(lubridate)
+library(dplyr)
+
+model_data <- data.clustered %>%
+  mutate(
+    hour = hour(timestamp),  # ← THIS was missing
+    dotw = factor(
+      wday(timestamp), 
+      levels = 1:7,
+      labels = c("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
+    ),
+    time_of_day = case_when(
+      hour >= 8  & hour <= 11 ~ "Morning",
+      hour >= 12 & hour <= 15 ~ "Midday",
+      hour >= 16 & hour <= 18 ~ "Afternoon",
+      TRUE                    ~ NA_character_
+    ) %>% factor(levels = c("Morning","Midday","Afternoon"))
+  ) %>%
+  filter(!is.na(time_of_day))
+
+
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(broom)
+
+# 1. Nest your data by cluster
+models_by_cluster <- model_data %>%
+  group_by(cluster) %>%
+  nest()
+
+# 2. Fit one lm per cluster (only dotw × time_of_day inside each cluster)
+models_by_cluster <- models_by_cluster %>%
+  mutate(
+    fit    = map(data, ~ lm(occupied_fraction_95 ~ dotw * time_of_day, data = .x)),
+    glance = map(fit, glance),   # model‐level summaries
+    tidy   = map(fit, tidy)      # coefficient tables
+  )
+
+# 3. Take a peek at cluster “3”’s coefficients:
+models_by_cluster %>%
+  filter(cluster == 3) %>%
+  pull(tidy) %>%
+  .[[1]]
+
+# 4. Or build a combined table of all coefficients:
+all_coefs <- models_by_cluster %>%
+  select(cluster, tidy) %>%
+  unnest(tidy)
+
+
+models_by_cluster <- model_data %>%
+  group_by(cluster) %>%
+  nest() %>%
+  mutate(
+    fit    = map(data, ~ lm(occupied_fraction_95 ~ dotw * time_of_day, data = .x)),
+    glance = map(fit, glance),
+    tidy   = map(fit, tidy)
+  )
+
+
+
+```
+
+
+
+# Pilot Program: Uptown District
+
+To test our proposed dynamic pricing strategy, we recommend starting with a **six-month pilot** in the **Uptown District**, specifically around North Stanton Street.
+
+## Why Uptown?
+
+The Uptown District presents a strategic testing ground for dynamic pricing because it features:
+
+- **Mixed-use land patterns**, including food and beverage establishments, retail, and residential areas.
+- **Existing evening-paid parking**, but low daytime occupancy — a clear opportunity for price-based demand shifting.
+- **Walkability and foot traffic data** that make it ideal for observing parking turnover and behavioral shifts.
+
+## Goals of the Pilot:
+
+- Evaluate if **lowering daytime prices** increases utilization.
+- Test whether **higher weekend/evening pricing** can reduce circling and increase turnover.
+- Measure whether occupancy rates approach our target range (70–80%) across different time bands.
+
+---
+
+## Full System Design
+
+Once the pilot is complete, our program can scale to other districts using a three-step strategy:
+
+### Step 1: Cluster-Based District Creation
+
+Using K-means clustering on 12 months of occupancy data, we identified **six distinct parking behavior clusters**. These clusters group streets based on shared hourly and daily demand patterns — not land use alone.
+
+> This ensures that pricing reflects how people actually park, not just how planners label space.
+
+Each cluster (district) becomes the unit of pricing, performance monitoring, and forecasting.
+
+### Step 2: Monitoring with Existing Data
+
+We utilize **parking meter transactions** and historical revenue data — which El Paso already collects — to infer occupancy. From this, we create variables such as:
+
+- Average occupancy by hour
+- Time over capacity (ToC)
+- Average minutes paid per transaction
+- Daily parking patterns by weekday/weekend
+
+> No new sensors are needed. Our method is low-cost, scalable, and uses existing infrastructure.
+
+### Step 3: Predictive Modeling for Price Guidance
+
+We developed **district-level regression models** to forecast hourly occupancy by:
+
+- Time of day (Morning, Midday, Afternoon)
+- Day of week (Mon–Sat)
+- Spatial effects (e.g., proximity to courts, stadiums, universities)
+
+The model outputs predicted occupancy levels (e.g., 0.68 = 68% full), which decision-makers can use to:
+
+- Raise prices when occupancy is projected >80%
+- Lower prices if predicted <50%
+- Keep prices stable when within target range (70–80%)
+
+---
+
+## Price Adjustment Logic
+
+| **Occupancy Forecast** | **Suggested Action**        |
+|------------------------|-----------------------------|
+| > 85%                  | Increase rate moderately     |
+| 70–85%                 | Keep rate stable             |
+| 50–70%                 | Monitor; adjust if needed    |
+| < 50%                  | Decrease rate to boost use   |
+
+Pricing can be adjusted **monthly or quarterly**, depending on operational feasibility.
+
+---
+
+## Sample Rate Schedule (Hypothetical)
+
+| **Time Period**      | **Weekday Rate** | **Weekend Rate** |
+|----------------------|------------------|------------------|
+| 8:00–12:00 AM        | \$1.00/hr         | \$1.50/hr         |
+| 12:00–4:00 PM        | \$1.50/hr         | \$2.00/hr         |
+| 4:00–6:00 PM         | \$2.00/hr         | \$2.50/hr         |
+
+> These are illustrative — actual rates will be adjusted using predicted occupancy and aligned with Council-approved caps.
+
+---
+
+## The Dashboard
+
+To support ongoing decision-making, we built a **prototype dashboard** that:
+
+- Visualizes occupancy trends, revenue, and time-over-capacity by district.
+- Allows managers to **toggle between current and predicted data**.
+- Supports **scenario testing** (e.g., “What if we raised evening rates in District 5?”).
+
+> This tool ensures El Paso can track and adjust the program in real time — making dynamic pricing both transparent and defensible.
+
+Link: https://theta1112.github.io/el-paso-dynamic-parking/
+
+---
+
+# Anticipated Challenges & Contingency Planning
+
+While our modeling framework is designed to be robust and adaptive, any citywide implementation must account for behavioral, technical, and political uncertainties.
+
+We identify three key behavioral scenarios that El Paso may encounter, and propose responses for each:
+
+---
+
+## Scenario 1: No Change in Behavior
+
+**Hypothesis:**  
+Drivers may ignore price changes due to habit, lack of awareness, or because price sensitivity is low in key corridors.
+
+**Risks:**
+- Continued congestion in high-demand areas
+- Underenforcement or price inertia
+
+**Mitigation:**
+- **Increase price differentials** between peak and off-peak periods.
+- Launch a **public awareness campaign** highlighting price benefits (e.g., easier parking turnover).
+- Leverage the dashboard to monitor zone-specific elasticity and intervene as needed.
+
+---
+
+## Scenario 2: Overreaction to Pricing
+
+**Hypothesis:**  
+Customers drastically reduce usage when rates increase, leading to underutilization.
+
+**Risks:**
+- Business owner complaints
+- Negative public perception of the program
+- Lost revenue or hollowed-out commercial blocks
+
+**Mitigation:**
+- Implement **soft caps** on rate increases (e.g., \$0.25/month max).
+- Use the dashboard to monitor sudden demand drops.
+- Communicate clearly that **pricing is flexible** and will respond to actual usage patterns.
+- Use foot traffic or mobility data to validate whether decline is temporary or structural.
+
+---
+
+## Scenario 3: Displacement & Spillover
+
+**Hypothesis:**  
+Drivers respond to paid zones by parking in adjacent unmetered or residential streets.
+
+**Risks:**
+- Resident frustration
+- Enforcement overload
+- Equity concerns
+
+**Mitigation:**
+- Coordinate with enforcement teams to **increase patrols** in surrounding spillover zones.
+- Consider **residential permit expansions** or time-restricted parking buffers.
+- Reassess district boundaries or add zones where pressure migrates.
+
+---
+
+## Monitoring & Responsive Adjustment
+
+Each of these scenarios highlights the importance of **continuous monitoring** and **iterative feedback** into the system.
+
+Our dashboard and model support:
+
+- **Monthly or quarterly pricing updates**
+- **District-specific reporting**
+- **Occupancy forecasts vs. observed data comparisons**
+
+This allows El Paso to operate a **self-correcting pricing system** — one that evolves with the city’s mobility patterns and avoids the “set-and-forget” trap common in older static pricing programs.
+
+---
+
+# Policy Recommendations & Long-Term Planning
+
+Our technical model provides the foundation — but successful implementation of a dynamic parking program also requires thoughtful, community-sensitive policy design.
+
+We outline short- and long-term recommendations for the City of El Paso.
+
+---
+
+## Short-Term: Pilot-Driven Implementation
+
+**Recommendation 1: Launch a 6-Month Pilot in Uptown**
+
+The Uptown District — particularly North Stanton Street — offers ideal conditions for piloting:
+
+- Varied demand by time of day and day of week
+- Presence of F&B and entertainment businesses
+- Low current occupancy during daytime hours
+
+The pilot will allow the City to:
+
+- Test price elasticity and district-based pricing
+- Validate the predictive model with real behavior
+- Refine messaging and enforcement strategies
+
+**Recommendation 2: Monthly or Quarterly Price Adjustments**
+
+- Adjust rates using the predictive dashboard
+- Publish public-facing reports to build transparency
+- Limit volatility with soft caps (e.g., max \$0.25/month adjustment)
+
+---
+
+## Medium-Term: System Expansion & Dashboard Scaling
+
+**Recommendation 3: Scale to All Metered Districts**
+
+After pilot evaluation, expand to all existing metered districts with tailored clustering and pricing models.
+
+**Recommendation 4: Public Dashboard Deployment**
+
+El Paso should publish a simplified version of the manager dashboard to:
+
+- Communicate price changes clearly
+- Improve public trust through transparency
+- Encourage feedback and civic engagement
+
+This mirrors best practices from Washington DC’s parkDC and San Francisco’s SFpark.
+
+---
+
+## Long-Term: Strategic Parking Reform
+
+**Recommendation 5: Remove Parking Requirements in Oversupplied Areas**
+
+Where chronic underutilization is documented, El Paso can:
+
+- Rezone to reduce minimum parking requirements
+- Encourage development or infill
+- Repurpose excess parking for public or commercial space
+
+This aligns with reform strategies from cities like **Baltimore** and **Boston**, where land once reserved for cars has been repurposed for housing, trees, or plazas.
+
+**Recommendation 6: Rethink the Role of Curb Space in Low-Demand Areas**
+
+El Paso’s extensive supply of curbside parking presents not only a pricing challenge — but also a **land use opportunity**. In districts like the Government/Industrial zone (District 3), our analysis revealed near-zero weekend demand despite high weekday occupancy. Rather than let this valuable space sit idle, the City can begin to treat curb space as a **dynamic public asset**, not just static infrastructure for vehicles.
+
+### Why This Matters: The Hidden Cost of Oversupplied Roads
+
+A recent study by Guerra, Duranton, and Ma (2024) quantifies a startling reality: nearly **one-quarter of all urbanized land in U.S. metro areas is dedicated to roadways**, totaling over **$4 trillion in land value**. That’s more land than the state of West Virginia, tied up in a single use — much of which is significantly underutilized at any given time.
+
+Their analysis found:
+
+- **Roadways account for roughly 24% of all urban land** across the U.S.  
+- This land was valued at **$4.1 trillion in 2016**, exceeding annual federal/state/local road spending combined  
+- Much of this space is not priced or managed efficiently — resulting in **a chronic oversupply of paved land**, especially in sunbelt cities
+
+> “The country likely has too much land dedicated to urban roads.”  
+> — *Guerra, Duranton, & Ma (2024)*
+
+This insight underscores a broader issue: cities like El Paso, with **low baseline occupancy rates** and limited geographic constraints, are likely overbuilt for cars — especially in off-peak periods.
+
+### Strategic Opportunity for El Paso
+
+Rather than simply pricing these underused spaces differently, we recommend that the City:
+
+- **Identify districts with predictable temporal dips** in parking demand (e.g., District 3 on weekends, District 1 in summer)
+- **Pilot “curb repurposing” initiatives** such as:
+  - Weekend open streets programs for walking, cycling, or cultural activation
+  - Community markets or vendor areas using temporary street closures
+  - Public seating, pop-up installations, or shade structures in peak heat zones
+
+- **Develop demand-responsive regulations**, such as:
+  - Time-of-day loading zones
+  - Adjustable signage for weekend events
+  - No-parking zones that convert into pedestrian plazas temporarily
+
+### Broader Benefits
+
+By approaching parking as a *multifunctional asset* rather than a fixed utility, El Paso can:
+
+- **Reduce reliance on costly parking expansion** in high-demand areas by reallocating underused space  
+- **Support equity goals** by providing more walkable and sociable streetscapes in underserved areas  
+- **Encourage mode shift**, especially in pedestrian-friendly downtown zones  
+- **Align with sustainability and climate goals** by reclaiming asphalt for public realm improvements
+
+### Bottom Line
+
+Curb space is too valuable to leave underused. With strong temporal patterns in El Paso’s parking data and national research showing roadway over-allocation, now is the time to experiment with **flexible, high-impact alternatives** to the traditional curb.
+
+*Turning pavement into places is not just an aesthetic choice — it's an economic and environmental one.*
+
+---
+
+#### Citation
+
+Guerra, E., Duranton, G., & Ma, X. (2024). *Urban roadway in America: The amount, extent, and value* (Working Paper No. 32824). National Bureau of Economic Research. https://doi.org/10.3386/w32824
+
+---
+
+
+# Summary of Recommendations
+
+1. **Pilot Dynamic Pricing in Uptown**
+   - Use the North Stanton area for a 6-month testbed with monthly rate adjustments.
+
+2. **Use Existing Meter Data for Occupancy Modeling**
+   - Avoid costly sensors by relying on meter transaction records to track demand.
+
+3. **Cluster Streets into Data-Driven Districts**
+   - Group blocks based on similar occupancy patterns, not just land use labels.
+
+4. **Implement Predictive Modeling for Price Adjustment**
+   - Use district-level regression models to forecast occupancy and recommend pricing levels.
+
+5. **Create a Public-Facing Dashboard**
+   - Build transparency and trust by sharing occupancy data and price logic with residents.
+
+6. **Repurpose Underutilized Curb Space**
+   - In areas like District 3, use low-demand periods for community-oriented uses.
+
+7. **Plan for Scalability**
+   - Design the program to scale citywide, with routine price reviews every 6–12 months.
+
+## Closing Remark
+
+The dynamic pricing model we’ve proposed is more than a revenue tool — it’s a **mobility management strategy**. With thoughtful rollout, El Paso can improve access, reduce congestion, and reimagine the curb as an active part of city life.
+
+
+
+
+
+
+
+
+
+
+
